@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html data-bs-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <title>Alternion</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+  <style>
+    body { background:#0d1117; color:#e6edf3; }
+    .card { background:#161b22; border:1px solid #30363d; }
+    .table > :not(caption) > * > * { background:transparent !important; color:#e6edf3; border-color:#30363d; }
+    .console-box { background:#010409; color:#3fb950; font-family:monospace; font-size:12px;
+                   height:300px; overflow-y:auto; padding:12px; border-radius:6px;
+                   white-space:pre-wrap; border:1px solid #30363d; }
+    .nav-link { color:#8b949e; }
+    .nav-link.active { color:#e6edf3; }
+  </style>
+</head>
+<body>
+<div class="container-fluid py-3 px-4">
+
+  <!-- Header -->
+  <div class="d-flex align-items-center mb-3 flex-wrap gap-2">
+    <h5 class="mb-0 me-auto">&#x26A1; Alternion <span class="text-muted fw-normal fs-6">&#x2014; Camille Marsac</span></h5>
+    <span id="st-total"     class="badge bg-secondary fs-6">&#x2013;</span>
+    <span id="st-genere"    class="badge bg-primary fs-6">&#x2013;</span>
+    <span id="st-envoye"    class="badge bg-info text-dark fs-6">&#x2013;</span>
+    <span id="st-entretien" class="badge bg-success fs-6">&#x2013;</span>
+    <span id="st-accepte"   class="badge bg-warning text-dark fs-6">&#x2013;</span>
+  </div>
+
+  <!-- Tabs -->
+  <ul class="nav nav-tabs mb-3">
+    <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#pTracker">Tracker</button></li>
+    <li class="nav-item"><button class="nav-link"        data-bs-toggle="tab" data-bs-target="#pActions">Actions</button></li>
+    <li class="nav-item"><button class="nav-link"        data-bs-toggle="tab" data-bs-target="#pCsv">Entreprises CSV</button></li>
+  </ul>
+
+  <div class="tab-content">
+
+    <!-- TRACKER -->
+    <div class="tab-pane fade show active" id="pTracker">
+      <div class="table-responsive">
+        <table class="table table-hover table-sm align-middle">
+          <thead class="table-dark">
+            <tr><th>Soci&#xe9;t&#xe9;</th><th>Email</th><th>G&#xe9;n&#xe9;r&#xe9;</th><th>Envoy&#xe9;</th><th>Statut</th><th>Notes</th><th></th></tr>
+          </thead>
+          <tbody id="trackerBody">
+            <tr><td colspan="7" class="text-center text-muted py-3">Chargement&#x2026;</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ACTIONS -->
+    <div class="tab-pane fade" id="pActions">
+      <div class="row g-3 mb-3">
+
+        <div class="col-lg-4">
+          <div class="card h-100">
+            <div class="card-body">
+              <h6 class="card-title">&#x1F4C4; G&#xe9;n&#xe9;rer les lettres</h6>
+              <p class="card-text text-muted small">Lance LettreMailing sur tout le CSV : g&#xe9;n&#xe8;re les PDF et copie le CV dans chaque dossier.</p>
+              <button class="btn btn-primary btn-sm" onclick="run('mailing')">&#x25B6; Lancer</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-lg-4">
+          <div class="card h-100">
+            <div class="card-body">
+              <h6 class="card-title">&#x2709; Envoyer les emails</h6>
+              <p class="card-text text-muted small">Envoie toutes les candidatures par Gmail avec LM + CV en pi&#xe8;ces jointes.</p>
+              <button class="btn btn-warning btn-sm text-dark" onclick="confirmEnvoi()">&#x25B6; Envoyer</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-lg-4">
+          <div class="card h-100">
+            <div class="card-body">
+              <h6 class="card-title">&#x1F50D; Scraper des offres</h6>
+              <div class="row g-1 mb-2">
+                <div class="col-8"><input id="scVille" class="form-control form-control-sm" placeholder="Ville (ex: Lyon)"></div>
+                <div class="col-4"><input id="scCP"    class="form-control form-control-sm" placeholder="CP"></div>
+                <div class="col-4"><input id="scRayon" class="form-control form-control-sm" placeholder="Rayon km" value="30"></div>
+                <div class="col-8"><input id="scRomes" class="form-control form-control-sm" placeholder="ROME (ex: M1805,M1810)"></div>
+              </div>
+              <button class="btn btn-success btn-sm" onclick="runScraper()">&#x25B6; Rechercher</button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+      <div class="d-flex justify-content-between align-items-center mb-1">
+        <small class="text-muted">Sortie</small>
+        <button class="btn btn-sm btn-outline-secondary py-0" onclick="clearConsole()">Effacer</button>
+      </div>
+      <div class="console-box" id="console">Pr&#xea;t &#x2014; cliquez sur une action ci-dessus.</div>
+    </div>
+
+    <!-- CSV -->
+    <div class="tab-pane fade" id="pCsv">
+      <p class="text-muted small mb-2">Contenu de <code>entreprises.csv</code> &#x2014; modifiez le fichier directement puis rechargez la page.</p>
+      <div class="table-responsive">
+        <table class="table table-hover table-sm">
+          <thead class="table-dark">
+            <tr><th>Titre</th><th>Soci&#xe9;t&#xe9;</th><th>Adresse</th><th>CP</th><th>Email</th></tr>
+          </thead>
+          <tbody id="csvBody">
+            <tr><td colspan="5" class="text-center text-muted py-3">Chargement&#x2026;</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+const STATUTS = ['g\u00e9n\u00e9r\u00e9','envoy\u00e9','relanc\u00e9','entretien','accept\u00e9','refus\u00e9'];
+
+async function loadTracker() {
+  const rows = await fetch('/api/tracker').then(r => r.json()).catch(() => []);
+  const cnt = s => rows.filter(r => r.statut === s).length;
+  document.getElementById('st-total').textContent     = 'Total : '      + rows.length;
+  document.getElementById('st-genere').textContent    = 'G\u00e9n\u00e9r\u00e9s : '    + cnt('g\u00e9n\u00e9r\u00e9');
+  document.getElementById('st-envoye').textContent    = 'Envoy\u00e9s : '    + cnt('envoy\u00e9');
+  document.getElementById('st-entretien').textContent = 'Entretiens : ' + cnt('entretien');
+  document.getElementById('st-accepte').textContent   = 'Accept\u00e9s : '   + cnt('accept\u00e9');
+  document.getElementById('trackerBody').innerHTML = rows.length
+    ? rows.map(function(row) { return '<tr>'
+        + '<td><strong>' + esc(row.societe) + '</strong></td>'
+        + '<td><small class="text-muted">' + esc(row.email_destinataire||'') + '</small></td>'
+        + '<td><small>' + (row.date_generation||'') + '</small></td>'
+        + '<td><small>' + (row.date_envoi||'\u2013') + '</small></td>'
+        + '<td><select class="form-select form-select-sm" style="width:115px" data-societe="' + esc(row.societe) + '" onchange="updateStatut(this)">'
+        + STATUTS.map(function(s) { return '<option' + (s===row.statut?' selected':'') + '>' + s + '</option>'; }).join('')
+        + '</select></td>'
+        + '<td><small class="text-muted">' + esc(row.notes||'') + '</small></td>'
+        + '<td><button class="btn btn-sm btn-outline-secondary py-0 px-2" data-societe="' + esc(row.societe) + '" onclick="editNote(this)">\u{1F4DD}</button></td>'
+        + '</tr>'; }).join('')
+    : '<tr><td colspan="7" class="text-center text-muted py-3">Aucune candidature dans le tracker.</td></tr>';
+}
+
+async function loadCsv() {
+  const rows = await fetch('/api/csv').then(r => r.json()).catch(() => []);
+  document.getElementById('csvBody').innerHTML = rows.length
+    ? rows.map(function(r) { return '<tr>'
+        + '<td>' + esc(r.titre||'') + '</td>'
+        + '<td>' + esc(r.societe||'') + '</td>'
+        + '<td>' + esc(r.adresse_postale||'') + '</td>'
+        + '<td>' + esc(r.code_postal||'') + '</td>'
+        + '<td><small>' + esc(r.email_destinataire||'') + '</small></td>'
+        + '</tr>'; }).join('')
+    : '<tr><td colspan="5" class="text-center text-muted py-3">CSV vide ou introuvable.</td></tr>';
+}
+
+async function updateStatut(sel) {
+  await fetch('/api/update', {
+    method: 'POST', headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({societe: sel.dataset.societe, statut: sel.value})
+  });
+  loadTracker();
+}
+
+async function editNote(btn) {
+  var note = prompt('Note pour ' + btn.dataset.societe + ' :');
+  if (note === null) return;
+  await fetch('/api/update', {
+    method: 'POST', headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({societe: btn.dataset.societe, notes: note})
+  });
+  loadTracker();
+}
+
+function run(action, extra) {
+  extra = extra || {};
+  document.querySelector('[data-bs-target="#pActions"]').click();
+  var cons = document.getElementById('console');
+  cons.textContent = '> ' + action + '\n';
+  var params = new URLSearchParams(Object.assign({action: action}, extra));
+  var src = new EventSource('/api/run?' + params);
+  src.onmessage = function(e) {
+    if (e.data === '[DONE]') { src.close(); loadTracker(); loadCsv(); return; }
+    cons.textContent += e.data + '\n';
+    cons.scrollTop = cons.scrollHeight;
+  };
+  src.onerror = function() { src.close(); cons.textContent += '[termin\u00e9]\n'; };
+}
+
+function confirmEnvoi() {
+  if (confirm('Envoyer les emails \u00e0 toutes les entreprises du CSV ?\nCette action est irr\u00e9versible.'))
+    run('envoi');
+}
+
+function runScraper() {
+  var ville = document.getElementById('scVille').value.trim();
+  if (!ville) { alert('Entrez une ville.'); return; }
+  run('scraper', {
+    ville: ville,
+    codepostal: document.getElementById('scCP').value.trim(),
+    rayon:      document.getElementById('scRayon').value.trim(),
+    romes:      document.getElementById('scRomes').value.trim()
+  });
+}
+
+function clearConsole() { document.getElementById('console').textContent = ''; }
+
+function esc(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+loadTracker();
+loadCsv();
+document.querySelector('[data-bs-target="#pCsv"]').addEventListener('shown.bs.tab', loadCsv);
+</script>
+</body>
+</html>

@@ -1,0 +1,21 @@
+# ── Credentials (NE JAMAIS commiter) ─────────────────────────────────────────
+config/config.properties
+
+# ── Build Maven ───────────────────────────────────────────────────────────────
+target/
+
+# ── IDE ───────────────────────────────────────────────────────────────────────
+.idea/
+*.iml
+.vscode/
+.classpath
+.project
+.settings/
+
+# ── Fichiers générés / temporaires ────────────────────────────────────────────
+*.zip
+lettre_personnalisee.docx
+
+# ── OS ────────────────────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db

@@ -1,0 +1,33 @@
+# Copier ce fichier en "config/config.properties" et remplir les valeurs
+# Ne jamais commiter config/config.properties sur git !
+
+# Ton adresse Gmail
+gmail.user=camille.marsac@gmail.com
+
+# Mot de passe d'application Gmail (16 caractères, généré sur myaccount.google.com)
+# Chemin : Sécurité → Validation en 2 étapes → Mots de passe d'application
+gmail.password=xxxx xxxx xxxx xxxx
+
+# Sujet de l'email
+email.sujet=Candidature alternance – [societe] | Camille Marsac
+
+# Corps de l'email (même texte pour tout le monde, \n = saut de ligne)
+email.corps=Remplace ce texte par ton email
+
+# ── Scraper ──────────────────────────────────────────────────────────────────
+# Ville et code postal de recherche
+scraper.ville=Paris
+scraper.codepostal=75001
+
+# Rayon de recherche en km (défaut : 30)
+scraper.rayon=30
+
+# Codes ROME séparés par des virgules
+# Référence : https://www.francetravail.fr/candidat/metiers/les-fiches-metiers.html
+# Exemples courants :
+#   M1805 = Développement informatique
+#   M1810 = Production et exploitation de systèmes d'information
+#   M1802 = Expertise et support en systèmes d'information
+#   E1103 = Communication
+#   M1403 = Études et prospectives socio-économiques
+scraper.romes=M1805,M1810
