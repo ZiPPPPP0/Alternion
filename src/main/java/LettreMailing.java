@@ -6,12 +6,11 @@ import java.util.*;
 
 public class LettreMailing {
 
-    private static final String PH_TITRE    = "[titre]";
     private static final String PH_SOCIETE  = "[societe]";
     private static final String PH_ADRESSE  = "[adresse_postale]";
     private static final String PH_CP_VILLE = "[code_postal]";
 
-    private static final String DOSSIER_BASE = "C:\\Users\\camil\\Desktop\\Alternance_2026";
+    private static final String DOSSIER_BASE = "outputs";
     private static final String NOM_FICHIER  = "LM_Camille_Marsac";
     private static final String CSV_FILE     = "data/entreprises.csv";
     private static final String MODELE_FILE  = "templates/lettre_modele.docx";
@@ -35,7 +34,7 @@ public class LettreMailing {
             System.err.println("Erreur : \"" + CSV_FILE + "\" introuvable dans : "
                     + csv.getAbsolutePath());
             System.err.println("Format attendu (première ligne = en-têtes) :");
-            System.err.println("  titre,societe,adresse_postale,code_postal,email_destinataire");
+            System.err.println("  societe,adresse_postale,code_postal,email_destinataire");
             System.exit(1);
         }
 
@@ -84,7 +83,6 @@ public class LettreMailing {
                                       String soffice, PrintStream out) throws Exception {
 
         Map<String, String> remplacements = new LinkedHashMap<>();
-        remplacements.put(PH_TITRE,    data.getOrDefault("titre", ""));
         remplacements.put(PH_SOCIETE,  data.getOrDefault("societe", ""));
         remplacements.put(PH_ADRESSE,  data.getOrDefault("adresse_postale", ""));
         remplacements.put(PH_CP_VILLE, data.getOrDefault("code_postal", ""));

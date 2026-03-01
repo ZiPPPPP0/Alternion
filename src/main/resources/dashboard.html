@@ -1,189 +1,902 @@
 <!DOCTYPE html>
-<html data-bs-theme="dark">
+<html lang="fr" data-theme="dark">
 <head>
   <meta charset="UTF-8">
   <title>Alternion</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
   <style>
-    body { background:#0d1117; color:#e6edf3; }
-    .card { background:#161b22; border:1px solid #30363d; }
-    .table > :not(caption) > * > * { background:transparent !important; color:#e6edf3; border-color:#30363d; }
-    .console-box { background:#010409; color:#3fb950; font-family:monospace; font-size:12px;
-                   height:300px; overflow-y:auto; padding:12px; border-radius:6px;
-                   white-space:pre-wrap; border:1px solid #30363d; }
-    .nav-link { color:#8b949e; }
-    .nav-link.active { color:#e6edf3; }
+    /* ── Variables de thème ────────────────────────────── */
+    :root {
+      --bg:       #070c07;
+      --bg-s:     #0c140c;
+      --bg-r:     #111d11;
+      --bg-i:     #050a05;
+      --brd:      #1a361a;
+      --brd-s:    #2a502a;
+      --txt:      #c0dac0;
+      --txt-d:    #587058;
+      --txt-m:    #364a36;
+      --acc:      #3ec44f;
+      --acc-d:    #2a9038;
+      --acc-glow: rgba(62,196,79,.12);
+      --dng:      #e05050;
+      --wrn:      #c89a18;
+      --bof-bg:   rgba(62,196,79,.14);
+      --bof-fg:   #3ec44f;
+      --bent-bg:  rgba(100,160,100,.12);
+      --bent-fg:  #7ab87a;
+      --con-bg:   #020602;
+      --con-fg:   #3ec44f;
+    }
+    [data-theme="light"] {
+      --bg:       #f2f7f2;
+      --bg-s:     #e8f0e8;
+      --bg-r:     #dde8dd;
+      --bg-i:     #ffffff;
+      --brd:      #90be90;
+      --brd-s:    #609060;
+      --txt:      #1a3a1a;
+      --txt-d:    #3a6a3a;
+      --txt-m:    #5a8a5a;
+      --acc:      #1e7a2e;
+      --acc-d:    #145022;
+      --acc-glow: rgba(30,122,46,.1);
+      --dng:      #aa2020;
+      --wrn:      #8a6010;
+      --bof-bg:   rgba(30,122,46,.14);
+      --bof-fg:   #1e7a2e;
+      --bent-bg:  rgba(70,110,70,.12);
+      --bent-fg:  #3a6a3a;
+      --con-bg:   #f4fdf4;
+      --con-fg:   #1a5a22;
+    }
+
+    /* ── Reset / Base ──────────────────────────────────── */
+    *, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
+    body { background:var(--bg); color:var(--txt); font-family:'Segoe UI',system-ui,sans-serif; font-size:14px; }
+    a { color:var(--acc); text-decoration:none; }
+    a:hover { text-decoration:underline; }
+    input, select, button, textarea { font-family:inherit; }
+
+    /* ── Header ───────────────────────────────────────── */
+    .hdr { display:flex; align-items:center; gap:12px; padding:10px 22px;
+           background:var(--bg-s); border-bottom:1px solid var(--brd); flex-wrap:wrap; }
+    .hdr-logo { font-size:1.05rem; font-weight:700; color:var(--acc); letter-spacing:.06em; }
+    .hdr-sub  { font-size:.72rem; color:var(--txt-d); margin-top:2px; }
+    .hdr-stats { display:flex; gap:6px; flex-wrap:wrap; margin-left:auto; align-items:center; }
+    .sp { font-size:.7rem; padding:2px 9px; border-radius:10px; border:1px solid var(--brd);
+          color:var(--txt-d); background:var(--bg-i); white-space:nowrap; }
+    .sp.hi { border-color:var(--acc); color:var(--acc); background:var(--acc-glow); }
+    .theme-btn { background:none; border:1px solid var(--brd); color:var(--txt-d); border-radius:5px;
+                 padding:3px 10px; cursor:pointer; font-size:.75rem; }
+    .theme-btn:hover { border-color:var(--acc); color:var(--acc); }
+
+    /* ── Tabs ─────────────────────────────────────────── */
+    .tabs { display:flex; border-bottom:1px solid var(--brd); background:var(--bg-s);
+            padding:0 22px; overflow-x:auto; }
+    .tab { background:none; border:none; border-bottom:2px solid transparent; color:var(--txt-d);
+           padding:9px 18px; cursor:pointer; font-size:.83rem; letter-spacing:.02em;
+           white-space:nowrap; margin-bottom:-1px; transition:color .12s; }
+    .tab:hover { color:var(--txt); }
+    .tab.on { color:var(--acc); border-bottom-color:var(--acc); }
+    .pane { display:none; padding:16px 22px; }
+    .pane.on { display:block; }
+
+    /* ── Grille actions ───────────────────────────────── */
+    .act-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:10px; margin-bottom:14px; }
+    @media(max-width:1100px) { .act-grid { grid-template-columns:repeat(2,1fr); } }
+    @media(max-width:580px)  { .act-grid { grid-template-columns:1fr; } }
+
+    /* ── Cards collapsibles ───────────────────────────── */
+    .card { background:var(--bg-s); border:1px solid var(--brd); border-radius:7px; overflow:hidden; }
+    .card-hdr { display:flex; align-items:center; justify-content:space-between; padding:9px 13px;
+                cursor:pointer; background:none; border:none; width:100%; color:var(--txt-d);
+                font-size:.72rem; text-transform:uppercase; letter-spacing:.08em; font-weight:600;
+                border-bottom:1px solid var(--brd); }
+    .card-hdr:hover { color:var(--acc); }
+    .card-hdr .chev { font-size:.6rem; transition:transform .18s; opacity:.5; }
+    .card-hdr.open .chev { transform:rotate(90deg); opacity:1; color:var(--acc); }
+    .card-hdr.open { color:var(--acc); }
+    .card-body { display:none; padding:12px 13px; }
+    .card-body.open { display:block; }
+
+    /* ── Formulaires ──────────────────────────────────── */
+    .flbl { display:block; font-size:.7rem; color:var(--txt-d); margin-bottom:3px;
+            text-transform:uppercase; letter-spacing:.04em; }
+    .finp, .fsel { display:block; width:100%; background:var(--bg-i); border:1px solid var(--brd);
+                   color:var(--txt); border-radius:5px; padding:5px 8px; font-size:.8rem; }
+    .finp:focus, .fsel:focus { outline:none; border-color:var(--acc); }
+    .fsel option { background:var(--bg-i); }
+    .frow  { display:grid; gap:8px; margin-bottom:8px; }
+    .fc2   { grid-template-columns:1fr 1fr; }
+    .fc31  { grid-template-columns:3fr 1fr; }
+
+    /* ── Multi-select dropdown ────────────────────────── */
+    .ms { position:relative; }
+    .ms-btn { display:flex; align-items:center; justify-content:space-between; gap:6px; width:100%;
+              background:var(--bg-i); border:1px solid var(--brd); color:var(--txt-d);
+              border-radius:5px; padding:5px 8px; font-size:.8rem; cursor:pointer; text-align:left; }
+    .ms-btn:hover, .ms-btn.open { border-color:var(--acc); color:var(--txt); }
+    .ms-lbl { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; flex:1; }
+    .ms-arr { font-size:.6rem; flex-shrink:0; transition:transform .15s; }
+    .ms-btn.open .ms-arr { transform:rotate(180deg); }
+    .ms-panel { display:none; position:absolute; top:calc(100% + 3px); left:0; right:0;
+                background:var(--bg-r); border:1px solid var(--acc); border-radius:6px;
+                z-index:400; max-height:230px; overflow-y:auto;
+                box-shadow:0 6px 24px rgba(0,0,0,.55); }
+    .ms-panel.open { display:block; }
+    .ms-grp { border-bottom:1px solid var(--brd); padding:3px 0; }
+    .ms-grp:last-child { border-bottom:none; }
+    .ms-glbl { font-size:.67rem; text-transform:uppercase; letter-spacing:.06em;
+               color:var(--txt-m); padding:5px 10px 2px; }
+    .mi { display:flex; align-items:center; gap:7px; padding:4px 10px; cursor:pointer; }
+    .mi:hover { background:var(--acc-glow); }
+    .mi input[type=checkbox] { accent-color:var(--acc); cursor:pointer; flex-shrink:0; }
+    .mi label { font-size:.79rem; color:var(--txt-d); cursor:pointer; line-height:1.3; }
+    .mi:hover label { color:var(--txt); }
+
+    /* ── Boutons ──────────────────────────────────────── */
+    .btn { display:inline-flex; align-items:center; gap:5px; border-radius:5px; padding:5px 12px;
+           font-size:.8rem; cursor:pointer; border:1px solid; transition:all .12s; line-height:1.2;
+           white-space:nowrap; }
+    .btn-g { background:var(--acc);  border-color:var(--acc);  color:#000; font-weight:600; }
+    .btn-g:hover { background:var(--acc-d); border-color:var(--acc-d); }
+    .btn-o { background:transparent; border-color:var(--brd);  color:var(--txt-d); }
+    .btn-o:hover { border-color:var(--acc); color:var(--acc); }
+    .btn-w { background:transparent; border-color:var(--wrn);  color:var(--wrn); }
+    .btn-w:hover { background:var(--wrn); color:#000; }
+    .btn-d { background:transparent; border-color:var(--dng);  color:var(--dng); }
+    .btn-d:hover { background:var(--dng); color:#fff; }
+    .btn-sm { padding:3px 9px; font-size:.75rem; }
+    .btn-xs { padding:2px 6px; font-size:.7rem; }
+    .btn:disabled { opacity:.45; cursor:not-allowed; }
+
+    /* ── Console ──────────────────────────────────────── */
+    .con-hdr { display:flex; justify-content:space-between; align-items:center; margin-bottom:6px; }
+    .con-lbl { font-size:.7rem; text-transform:uppercase; letter-spacing:.07em; color:var(--txt-m); }
+    .con-box { background:var(--con-bg); color:var(--con-fg); font-family:'Courier New',Consolas,monospace;
+               font-size:.76rem; height:250px; overflow-y:auto; padding:10px 13px; border-radius:6px;
+               white-space:pre-wrap; border:1px solid var(--brd); }
+
+    /* ── Tables ───────────────────────────────────────── */
+    .tbl-wrap { overflow-x:auto; }
+    .tbl { width:100%; border-collapse:collapse; }
+    .tbl th { font-size:.68rem; text-transform:uppercase; letter-spacing:.06em; color:var(--txt-d);
+              font-weight:600; padding:8px 10px; border-bottom:2px solid var(--brd); white-space:nowrap; }
+    .tbl td { padding:7px 10px; border-bottom:1px solid var(--brd); font-size:.82rem; vertical-align:middle; }
+    .tbl tr:last-child td { border-bottom:none; }
+    .erow { cursor:pointer; transition:background .1s; }
+    .erow:hover, .erow.xp { background:var(--bg-r); }
+    .drow td { padding:0; border-bottom:1px solid var(--brd); }
+    .det-box { padding:10px 14px; background:var(--bg-i); display:grid; gap:5px; }
+    .det-box .dl { display:flex; gap:10px; font-size:.79rem; align-items:baseline; }
+    .det-box .dk { color:var(--txt-d); font-size:.69rem; text-transform:uppercase;
+                   letter-spacing:.05em; min-width:68px; flex-shrink:0; }
+    .det-box .dv { color:var(--txt); word-break:break-word; }
+
+    /* ── Badges ───────────────────────────────────────── */
+    .bdg { display:inline-block; border-radius:3px; padding:1px 6px; font-size:.67rem;
+           font-weight:600; letter-spacing:.02em; white-space:nowrap; border:1px solid; }
+    .bdg-offre { background:var(--bof-bg); color:var(--bof-fg); border-color:var(--bof-fg); }
+    .bdg-ent   { background:var(--bent-bg); color:var(--bent-fg); border-color:var(--bent-fg); }
+    .bdg-done  { background:rgba(80,80,80,.15); color:var(--txt-m); border-color:var(--txt-m); }
+
+    /* ── Buckets ──────────────────────────────────────── */
+    .bkt-bar { display:flex; gap:7px; flex-wrap:wrap; align-items:center; margin-bottom:12px; }
+    .bkt-pill { background:transparent; border:1px solid var(--brd); color:var(--txt-d);
+                border-radius:10px; padding:2px 11px; font-size:.74rem; cursor:pointer;
+                transition:all .12s; }
+    .bkt-pill:hover { border-color:var(--acc); color:var(--acc); }
+    .bkt-pill.on { background:var(--acc-glow); border-color:var(--acc); color:var(--acc); }
+    .bkt-acts { margin-left:auto; display:flex; gap:6px; }
+
+    /* ── Modals custom ────────────────────────────────── */
+    .ov { display:none; position:fixed; inset:0; background:rgba(0,0,0,.58); z-index:500;
+          align-items:center; justify-content:center; }
+    .ov.on { display:flex; }
+    .mbox { background:var(--bg-r); border:1px solid var(--brd-s); border-radius:8px;
+            padding:18px 20px; width:min(390px,94vw); box-shadow:0 12px 50px rgba(0,0,0,.6); }
+    .mtit { font-size:.9rem; font-weight:600; color:var(--txt); margin-bottom:14px; }
+    .mfld { margin-bottom:10px; }
+    .mfoo { display:flex; justify-content:flex-end; gap:8px; margin-top:14px; }
+
+    /* ── Misc ─────────────────────────────────────────── */
+    .tb-hdr { display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; }
+    .tb-tit { font-size:.72rem; text-transform:uppercase; letter-spacing:.07em; color:var(--txt-d); }
+    .empty  { color:var(--txt-m); font-size:.8rem; text-align:center; padding:20px; }
+    .ra { display:flex; gap:4px; justify-content:flex-end; white-space:nowrap; }
+    .stat-sel { background:var(--bg-i); border:1px solid var(--brd); color:var(--txt);
+                border-radius:4px; padding:2px 5px; font-size:.76rem; }
+    code { background:var(--bg-i); border:1px solid var(--brd); border-radius:3px;
+           padding:1px 5px; font-size:.8em; color:var(--txt-d); }
+    .hint { font-size:.72rem; color:var(--txt-d); margin-top:6px; }
   </style>
 </head>
 <body>
-<div class="container-fluid py-3 px-4">
 
-  <!-- Header -->
-  <div class="d-flex align-items-center mb-3 flex-wrap gap-2">
-    <h5 class="mb-0 me-auto">&#x26A1; Alternion <span class="text-muted fw-normal fs-6">&#x2014; Camille Marsac</span></h5>
-    <span id="st-total"     class="badge bg-secondary fs-6">&#x2013;</span>
-    <span id="st-genere"    class="badge bg-primary fs-6">&#x2013;</span>
-    <span id="st-envoye"    class="badge bg-info text-dark fs-6">&#x2013;</span>
-    <span id="st-entretien" class="badge bg-success fs-6">&#x2013;</span>
-    <span id="st-accepte"   class="badge bg-warning text-dark fs-6">&#x2013;</span>
+<!-- ── Header ───────────────────────────────────────────── -->
+<header class="hdr">
+  <div>
+    <div class="hdr-logo">&#11043; Alternion</div>
+    <div class="hdr-sub">Camille Marsac &mdash; Suivi des candidatures alternance</div>
   </div>
+  <div class="hdr-stats">
+    <span id="st-total"     class="sp">&#8212;</span>
+    <span id="st-genere"    class="sp">&#8212;</span>
+    <span id="st-envoye"    class="sp">&#8212;</span>
+    <span id="st-entretien" class="sp hi">&#8212;</span>
+    <span id="st-accepte"   class="sp">&#8212;</span>
+  </div>
+  <button class="theme-btn" id="themeBtn" onclick="toggleTheme()">&#9790; Dark</button>
+</header>
 
-  <!-- Tabs -->
-  <ul class="nav nav-tabs mb-3">
-    <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#pTracker">Tracker</button></li>
-    <li class="nav-item"><button class="nav-link"        data-bs-toggle="tab" data-bs-target="#pActions">Actions</button></li>
-    <li class="nav-item"><button class="nav-link"        data-bs-toggle="tab" data-bs-target="#pCsv">Entreprises CSV</button></li>
-  </ul>
+<!-- ── Barre d'onglets ──────────────────────────────────── -->
+<nav class="tabs">
+  <button class="tab on" data-tab="pActions" onclick="switchTab(this)">Actions</button>
+  <button class="tab" data-tab="pTracker"  onclick="switchTab(this)">Tracker</button>
+  <button class="tab" data-tab="pOffres"   onclick="switchTab(this);loadBuckets().then(loadOffres)">Entreprises</button>
+  <button class="tab" data-tab="pCsv"      onclick="switchTab(this);loadCsv()">En validation</button>
+</nav>
 
-  <div class="tab-content">
+<!-- ── Pane : Actions ───────────────────────────────────── -->
+<div id="pActions" class="pane on">
+  <div class="act-grid">
 
-    <!-- TRACKER -->
-    <div class="tab-pane fade show active" id="pTracker">
-      <div class="table-responsive">
-        <table class="table table-hover table-sm align-middle">
-          <thead class="table-dark">
-            <tr><th>Soci&#xe9;t&#xe9;</th><th>Email</th><th>G&#xe9;n&#xe9;r&#xe9;</th><th>Envoy&#xe9;</th><th>Statut</th><th>Notes</th><th></th></tr>
-          </thead>
-          <tbody id="trackerBody">
-            <tr><td colspan="7" class="text-center text-muted py-3">Chargement&#x2026;</td></tr>
-          </tbody>
-        </table>
+    <!-- Générer les lettres -->
+    <div class="card">
+      <button class="card-hdr" onclick="toggleCard(this)">
+        <span>G&eacute;n&eacute;rer les lettres</span>
+        <span class="chev">&#9654;</span>
+      </button>
+      <div class="card-body">
+        <p class="hint" style="margin-bottom:10px">Lance LettreMailing &mdash; g&eacute;n&egrave;re les PDF et copie le CV dans chaque dossier entreprise.</p>
+        <button class="btn btn-g btn-sm" onclick="run('mailing')">Lancer</button>
       </div>
     </div>
 
-    <!-- ACTIONS -->
-    <div class="tab-pane fade" id="pActions">
-      <div class="row g-3 mb-3">
+    <!-- Envoyer les emails -->
+    <div class="card">
+      <button class="card-hdr" onclick="toggleCard(this)">
+        <span>Envoyer les emails</span>
+        <span class="chev">&#9654;</span>
+      </button>
+      <div class="card-body">
+        <p class="hint" style="margin-bottom:10px">Envoie toutes les candidatures par Gmail avec lettre et CV en pi&egrave;ces jointes.</p>
+        <button class="btn btn-w btn-sm" onclick="confirmEnvoi()">Envoyer</button>
+      </div>
+    </div>
 
-        <div class="col-lg-4">
-          <div class="card h-100">
-            <div class="card-body">
-              <h6 class="card-title">&#x1F4C4; G&#xe9;n&#xe9;rer les lettres</h6>
-              <p class="card-text text-muted small">Lance LettreMailing sur tout le CSV : g&#xe9;n&#xe8;re les PDF et copie le CV dans chaque dossier.</p>
-              <button class="btn btn-primary btn-sm" onclick="run('mailing')">&#x25B6; Lancer</button>
-            </div>
+    <!-- Scraper offres LBA -->
+    <div class="card">
+      <button class="card-hdr" onclick="toggleCard(this)">
+        <span>Scraper offres (LBA)</span>
+        <span class="chev">&#9654;</span>
+      </button>
+      <div class="card-body">
+        <div class="frow fc31">
+          <div>
+            <label class="flbl">Ville</label>
+            <select id="scVilleSelect" class="fsel" onchange="onVilleChange()">
+              <option value="Caen|14000">Caen</option>
+              <option value="Rouen|76000">Rouen</option>
+              <option value="&Eacute;vreux|27000">&Eacute;vreux</option>
+              <option value="Argentan|61200">Argentan</option>
+              <option value="Granville|50400">Granville</option>
+              <option value="">Autre&hellip;</option>
+            </select>
+          </div>
+          <div>
+            <label class="flbl">Rayon (km)</label>
+            <input id="scRayon" class="finp" value="60">
           </div>
         </div>
-
-        <div class="col-lg-4">
-          <div class="card h-100">
-            <div class="card-body">
-              <h6 class="card-title">&#x2709; Envoyer les emails</h6>
-              <p class="card-text text-muted small">Envoie toutes les candidatures par Gmail avec LM + CV en pi&#xe8;ces jointes.</p>
-              <button class="btn btn-warning btn-sm text-dark" onclick="confirmEnvoi()">&#x25B6; Envoyer</button>
-            </div>
+        <div id="scVilleManuel" style="display:none" class="frow fc2">
+          <div>
+            <label class="flbl">Ville</label>
+            <input id="scVille" class="finp" placeholder="Lyon">
+          </div>
+          <div>
+            <label class="flbl">Code postal</label>
+            <input id="scCP" class="finp" placeholder="69001">
           </div>
         </div>
-
-        <div class="col-lg-4">
-          <div class="card h-100">
-            <div class="card-body">
-              <h6 class="card-title">&#x1F50D; Scraper des offres</h6>
-              <div class="row g-1 mb-2">
-                <div class="col-8"><input id="scVille" class="form-control form-control-sm" placeholder="Ville (ex: Lyon)"></div>
-                <div class="col-4"><input id="scCP"    class="form-control form-control-sm" placeholder="CP"></div>
-                <div class="col-4"><input id="scRayon" class="form-control form-control-sm" placeholder="Rayon km" value="30"></div>
-                <div class="col-8"><input id="scRomes" class="form-control form-control-sm" placeholder="ROME (ex: M1805,M1810)"></div>
+        <div style="margin-bottom:10px">
+          <label class="flbl">Domaines ROME</label>
+          <div class="ms" id="msRome">
+            <button class="ms-btn" onclick="toggleMs('msRome')" type="button">
+              <span class="ms-lbl" id="msRomeLbl">S&eacute;lectionner&hellip;</span>
+              <span class="ms-arr">&#9660;</span>
+            </button>
+            <div class="ms-panel" id="msRomePanel">
+              <div class="ms-grp">
+                <div class="ms-glbl">Informatique</div>
+                <div class="mi"><input type="checkbox" name="rome" value="M1805" id="rM1805"><label for="rM1805">M1805 &mdash; D&eacute;veloppement informatique</label></div>
+                <div class="mi"><input type="checkbox" name="rome" value="M1810" id="rM1810"><label for="rM1810">M1810 &mdash; Production &amp; exploitation SI</label></div>
+                <div class="mi"><input type="checkbox" name="rome" value="M1802" id="rM1802"><label for="rM1802">M1802 &mdash; Expertise &amp; support SI</label></div>
+                <div class="mi"><input type="checkbox" name="rome" value="M1806" id="rM1806"><label for="rM1806">M1806 &mdash; Conseil &amp; MOA SI</label></div>
+                <div class="mi"><input type="checkbox" name="rome" value="M1801" id="rM1801"><label for="rM1801">M1801 &mdash; Administration SI</label></div>
+                <div class="mi"><input type="checkbox" name="rome" value="M1803" id="rM1803"><label for="rM1803">M1803 &mdash; Direction des SI</label></div>
+                <div class="mi"><input type="checkbox" name="rome" value="M1804" id="rM1804"><label for="rM1804">M1804 &mdash; D&eacute;veloppement jeux vid&eacute;o</label></div>
+                <div class="mi"><input type="checkbox" name="rome" value="M1808" id="rM1808"><label for="rM1808">M1808 &mdash; Information g&eacute;ographique</label></div>
+                <div class="mi"><input type="checkbox" name="rome" value="M1807" id="rM1807"><label for="rM1807">M1807 &mdash; Architecture &amp; urbanisme SI</label></div>
               </div>
-              <button class="btn btn-success btn-sm" onclick="runScraper()">&#x25B6; Rechercher</button>
+              <div class="ms-grp">
+                <div class="ms-glbl">Restauration &amp; H&ocirc;tellerie</div>
+                <div class="mi"><input type="checkbox" name="rome" value="H2101" id="rH2101"><label for="rH2101">H2101 &mdash; Service en restauration</label></div>
+                <div class="mi"><input type="checkbox" name="rome" value="H2102" id="rH2102"><label for="rH2102">H2102 &mdash; Management restauration</label></div>
+                <div class="mi"><input type="checkbox" name="rome" value="H2301" id="rH2301"><label for="rH2301">H2301 &mdash; Cuisine (commis, cuisinier)</label></div>
+                <div class="mi"><input type="checkbox" name="rome" value="G1703" id="rG1703"><label for="rG1703">G1703 &mdash; R&eacute;ception h&ocirc;teli&egrave;re</label></div>
+                <div class="mi"><input type="checkbox" name="rome" value="G1801" id="rG1801"><label for="rG1801">G1801 &mdash; Portier, voiturier</label></div>
+              </div>
+              <div class="ms-grp">
+                <div class="ms-glbl">Commerce &amp; Grande distribution</div>
+                <div class="mi"><input type="checkbox" name="rome" value="D1505" id="rD1505"><label for="rD1505">D1505 &mdash; H&ocirc;tesse / personnel de caisse</label></div>
+                <div class="mi"><input type="checkbox" name="rome" value="D1507" id="rD1507"><label for="rD1507">D1507 &mdash; Mise en rayon libre-service</label></div>
+                <div class="mi"><input type="checkbox" name="rome" value="D1211" id="rD1211"><label for="rD1211">D1211 &mdash; Vente en alimentation</label></div>
+                <div class="mi"><input type="checkbox" name="rome" value="D1212" id="rD1212"><label for="rD1212">D1212 &mdash; Vente habillement &amp; accessoires</label></div>
+                <div class="mi"><input type="checkbox" name="rome" value="D1106" id="rD1106"><label for="rD1106">D1106 &mdash; Vente &eacute;quipement maison</label></div>
+              </div>
+              <div class="ms-grp">
+                <div class="ms-glbl">Accueil &amp; Services</div>
+                <div class="mi"><input type="checkbox" name="rome" value="M1601" id="rM1601"><label for="rM1601">M1601 &mdash; Accueil &amp; renseignements</label></div>
+                <div class="mi"><input type="checkbox" name="rome" value="K1304" id="rK1304"><label for="rK1304">K1304 &mdash; Services domestiques / aide m&eacute;nag&egrave;re</label></div>
+                <div class="mi"><input type="checkbox" name="rome" value="N1103" id="rN1103"><label for="rN1103">N1103 &mdash; Magasinage &amp; stockage</label></div>
+                <div class="mi"><input type="checkbox" name="rome" value="N1105" id="rN1105"><label for="rN1105">N1105 &mdash; Manutention</label></div>
+                <div class="mi"><input type="checkbox" name="rome" value="K2204" id="rK2204"><label for="rK2204">K2204 &mdash; Surveillance &amp; gardiennage</label></div>
+              </div>
             </div>
           </div>
         </div>
-
-      </div>
-      <div class="d-flex justify-content-between align-items-center mb-1">
-        <small class="text-muted">Sortie</small>
-        <button class="btn btn-sm btn-outline-secondary py-0" onclick="clearConsole()">Effacer</button>
-      </div>
-      <div class="console-box" id="console">Pr&#xea;t &#x2014; cliquez sur une action ci-dessus.</div>
-    </div>
-
-    <!-- CSV -->
-    <div class="tab-pane fade" id="pCsv">
-      <p class="text-muted small mb-2">Contenu de <code>entreprises.csv</code> &#x2014; modifiez le fichier directement puis rechargez la page.</p>
-      <div class="table-responsive">
-        <table class="table table-hover table-sm">
-          <thead class="table-dark">
-            <tr><th>Titre</th><th>Soci&#xe9;t&#xe9;</th><th>Adresse</th><th>CP</th><th>Email</th></tr>
-          </thead>
-          <tbody id="csvBody">
-            <tr><td colspan="5" class="text-center text-muted py-3">Chargement&#x2026;</td></tr>
-          </tbody>
-        </table>
+        <button class="btn btn-g btn-sm" onclick="runScraper()">Rechercher</button>
       </div>
     </div>
 
+    <!-- Scraper entreprises INSEE / APE -->
+    <div class="card">
+      <button class="card-hdr" onclick="toggleCard(this)">
+        <span>Scraper entreprises (APE)</span>
+        <span class="chev">&#9654;</span>
+      </button>
+      <div class="card-body">
+        <div class="frow fc2">
+          <div>
+            <label class="flbl">D&eacute;partement</label>
+            <select id="enDept" class="fsel" onchange="onDeptChange()">
+              <option value="14">14 &mdash; Calvados</option>
+              <option value="27">27 &mdash; Eure</option>
+              <option value="50">50 &mdash; Manche</option>
+              <option value="61">61 &mdash; Orne</option>
+              <option value="76">76 &mdash; Seine-Maritime</option>
+              <option value="">Autre&hellip;</option>
+            </select>
+          </div>
+          <div id="enDeptManuelDiv" style="display:none">
+            <label class="flbl">N&deg; d&eacute;p.</label>
+            <input id="enDeptManuel" class="finp" placeholder="69">
+          </div>
+        </div>
+        <div style="margin-bottom:10px">
+          <label class="flbl">Codes APE</label>
+          <div class="ms" id="msApe">
+            <button class="ms-btn" onclick="toggleMs('msApe')" type="button">
+              <span class="ms-lbl" id="msApeLbl">S&eacute;lectionner&hellip;</span>
+              <span class="ms-arr">&#9660;</span>
+            </button>
+            <div class="ms-panel" id="msApePanel">
+              <div class="ms-grp">
+                <div class="ms-glbl">Informatique &amp; Num&eacute;rique</div>
+                <div class="mi"><input type="checkbox" name="ape" value="62.01Z" id="a6201Z"><label for="a6201Z">62.01Z &mdash; Programmation informatique</label></div>
+                <div class="mi"><input type="checkbox" name="ape" value="62.02A" id="a6202A"><label for="a6202A">62.02A &mdash; Conseil syst&egrave;mes &amp; logiciels</label></div>
+                <div class="mi"><input type="checkbox" name="ape" value="62.02B" id="a6202B"><label for="a6202B">62.02B &mdash; Tierce maintenance SI</label></div>
+                <div class="mi"><input type="checkbox" name="ape" value="62.03Z" id="a6203Z"><label for="a6203Z">62.03Z &mdash; Gestion installations info.</label></div>
+                <div class="mi"><input type="checkbox" name="ape" value="62.09Z" id="a6209Z"><label for="a6209Z">62.09Z &mdash; Autres activit&eacute;s info.</label></div>
+                <div class="mi"><input type="checkbox" name="ape" value="63.11Z" id="a6311Z"><label for="a6311Z">63.11Z &mdash; H&eacute;bergement &amp; donn&eacute;es</label></div>
+                <div class="mi"><input type="checkbox" name="ape" value="58.29C" id="a5829C"><label for="a5829C">58.29C &mdash; &Eacute;dition logiciels applicatifs</label></div>
+                <div class="mi"><input type="checkbox" name="ape" value="58.29A" id="a5829A"><label for="a5829A">58.29A &mdash; &Eacute;dition logiciels syst&egrave;mes</label></div>
+                <div class="mi"><input type="checkbox" name="ape" value="71.12B" id="a7112B"><label for="a7112B">71.12B &mdash; Ing&eacute;nierie &amp; bureau d&rsquo;&eacute;tudes</label></div>
+              </div>
+              <div class="ms-grp">
+                <div class="ms-glbl">Restauration &amp; H&ocirc;tellerie</div>
+                <div class="mi"><input type="checkbox" name="ape" value="56.10A" id="a5610A"><label for="a5610A">56.10A &mdash; Restauration traditionnelle</label></div>
+                <div class="mi"><input type="checkbox" name="ape" value="56.10B" id="a5610B"><label for="a5610B">56.10B &mdash; Caf&eacute;t&eacute;rias &amp; libres-services</label></div>
+                <div class="mi"><input type="checkbox" name="ape" value="56.21Z" id="a5621Z"><label for="a5621Z">56.21Z &mdash; Traiteurs &amp; r&eacute;ceptions</label></div>
+                <div class="mi"><input type="checkbox" name="ape" value="56.29A" id="a5629A"><label for="a5629A">56.29A &mdash; Restauration collective</label></div>
+                <div class="mi"><input type="checkbox" name="ape" value="56.29B" id="a5629B"><label for="a5629B">56.29B &mdash; Autres services restauration</label></div>
+                <div class="mi"><input type="checkbox" name="ape" value="56.30Z" id="a5630Z"><label for="a5630Z">56.30Z &mdash; D&eacute;bits de boissons (bars, caf&eacute;s)</label></div>
+                <div class="mi"><input type="checkbox" name="ape" value="55.10Z" id="a5510Z"><label for="a5510Z">55.10Z &mdash; H&ocirc;tels &amp; h&eacute;bergement</label></div>
+                <div class="mi"><input type="checkbox" name="ape" value="55.20Z" id="a5520Z"><label for="a5520Z">55.20Z &mdash; H&eacute;bergement touristique</label></div>
+              </div>
+              <div class="ms-grp">
+                <div class="ms-glbl">Commerce &amp; Grande distribution</div>
+                <div class="mi"><input type="checkbox" name="ape" value="47.11B" id="a4711B"><label for="a4711B">47.11B &mdash; Supermarch&eacute;s</label></div>
+                <div class="mi"><input type="checkbox" name="ape" value="47.11F" id="a4711F"><label for="a4711F">47.11F &mdash; Hypermarch&eacute;s</label></div>
+                <div class="mi"><input type="checkbox" name="ape" value="47.29Z" id="a4729Z"><label for="a4729Z">47.29Z &mdash; Autres commerces alimentaires</label></div>
+                <div class="mi"><input type="checkbox" name="ape" value="47.21Z" id="a4721Z"><label for="a4721Z">47.21Z &mdash; Commerce fruits &amp; l&eacute;gumes</label></div>
+                <div class="mi"><input type="checkbox" name="ape" value="47.71Z" id="a4771Z"><label for="a4771Z">47.71Z &mdash; Commerce habillement</label></div>
+                <div class="mi"><input type="checkbox" name="ape" value="47.72Z" id="a4772Z"><label for="a4772Z">47.72Z &mdash; Commerce chaussures</label></div>
+                <div class="mi"><input type="checkbox" name="ape" value="47.99Z" id="a4799Z"><label for="a4799Z">47.99Z &mdash; Autres commerces de d&eacute;tail</label></div>
+              </div>
+              <div class="ms-grp">
+                <div class="ms-glbl">Services aux personnes</div>
+                <div class="mi"><input type="checkbox" name="ape" value="81.21Z" id="a8121Z"><label for="a8121Z">81.21Z &mdash; Nettoyage courant b&acirc;timents</label></div>
+                <div class="mi"><input type="checkbox" name="ape" value="81.22Z" id="a8122Z"><label for="a8122Z">81.22Z &mdash; Nettoyage industriel</label></div>
+                <div class="mi"><input type="checkbox" name="ape" value="96.01A" id="a9601A"><label for="a9601A">96.01A &mdash; Blanchisseries &amp; laveries</label></div>
+                <div class="mi"><input type="checkbox" name="ape" value="88.10A" id="a8810A"><label for="a8810A">88.10A &mdash; Aide &agrave; domicile</label></div>
+                <div class="mi"><input type="checkbox" name="ape" value="80.10Z" id="a8010Z"><label for="a8010Z">80.10Z &mdash; S&eacute;curit&eacute; priv&eacute;e</label></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <button class="btn btn-g btn-sm" onclick="runScraperEntreprises()">Rechercher</button>
+      </div>
+    </div>
+
+  </div><!-- /act-grid -->
+
+  <div class="con-hdr">
+    <span class="con-lbl">Sortie console</span>
+    <button class="btn btn-o btn-xs" onclick="clearConsole()">Effacer</button>
+  </div>
+  <div class="con-box" id="console">Pr&ecirc;t &mdash; cliquez sur une action ci-dessus.</div>
+</div>
+
+<!-- ── Pane : Tracker ────────────────────────────────────── -->
+<div id="pTracker" class="pane">
+  <div class="tbl-wrap">
+    <table class="tbl">
+      <thead>
+        <tr>
+          <th style="width:24%">Soci&eacute;t&eacute;</th>
+          <th style="width:22%">Email</th>
+          <th style="width:10%">G&eacute;n&eacute;r&eacute;</th>
+          <th style="width:10%">Envoy&eacute;</th>
+          <th style="width:12%">Statut</th>
+          <th>Notes</th>
+          <th style="width:14%"></th>
+        </tr>
+      </thead>
+      <tbody id="trackerBody">
+        <tr><td colspan="7" class="empty">Chargement&hellip;</td></tr>
+      </tbody>
+    </table>
   </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<!-- ── Pane : Entreprises (buckets) ─────────────────────── -->
+<div id="pOffres" class="pane">
+  <div class="bkt-bar">
+    <div id="bucketPills" style="display:flex;gap:6px;flex-wrap:wrap;flex:1"></div>
+    <div class="bkt-acts">
+      <button class="btn btn-o btn-xs" onclick="clearBucket()">Vider</button>
+      <button id="btnDelBucket" class="btn btn-d btn-xs" onclick="deleteBucket()" style="display:none">Supprimer</button>
+    </div>
+  </div>
+  <p style="font-size:.76rem;color:var(--txt-d);margin-bottom:10px">
+    Cliquez sur une ligne pour afficher les d&eacute;tails. Cliquez sur <strong>&rarr; Valider</strong> pour transf&eacute;rer dans <em>En validation</em>.
+  </p>
+  <div class="tbl-wrap">
+    <table class="tbl">
+      <thead>
+        <tr>
+          <th style="width:32%">Soci&eacute;t&eacute;</th>
+          <th style="width:18%">CP / Ville</th>
+          <th style="width:22%">Domaine</th>
+          <th style="width:10%">Source</th>
+          <th style="width:18%"></th>
+        </tr>
+      </thead>
+      <tbody id="offresBody">
+        <tr><td colspan="5" class="empty">Chargement&hellip;</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ── Pane : En validation ──────────────────────────────── -->
+<div id="pCsv" class="pane">
+  <div class="tb-hdr">
+    <span class="tb-tit">Contenu de <code>data/entreprises.csv</code></span>
+    <button class="btn btn-g btn-sm" onclick="ouvrirAjout()">+ Ajouter</button>
+  </div>
+  <div class="tbl-wrap">
+    <table class="tbl">
+      <thead>
+        <tr>
+          <th style="width:30%">Soci&eacute;t&eacute;</th>
+          <th style="width:38%">Adresse</th>
+          <th style="width:22%">Email</th>
+          <th style="width:10%"></th>
+        </tr>
+      </thead>
+      <tbody id="csvBody">
+        <tr><td colspan="4" class="empty">Chargement&hellip;</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ── Modal : s&eacute;lection bucket ─────────────────────────── -->
+<div id="ovBucket" class="ov" onclick="if(event.target===this)hideModal('ovBucket')">
+  <div class="mbox">
+    <div class="mtit">R&eacute;pertoire de destination</div>
+    <div class="mfld">
+      <label class="flbl">R&eacute;pertoire</label>
+      <select id="bucketModalSel" class="fsel" onchange="onBucketModalChange()"></select>
+    </div>
+    <div id="newBucketDiv" style="display:none" class="mfld">
+      <label class="flbl">Nom du nouveau r&eacute;pertoire</label>
+      <input id="newBucketName" class="finp" placeholder="ex&nbsp;: normandie">
+    </div>
+    <div class="mfoo">
+      <button class="btn btn-o btn-sm" onclick="hideModal('ovBucket')">Annuler</button>
+      <button class="btn btn-g btn-sm" onclick="confirmRunWithBucket()">Lancer</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Modal : ajout / modification entreprise ──────────── -->
+<div id="ovEntreprise" class="ov" onclick="if(event.target===this)hideModal('ovEntreprise')">
+  <div class="mbox">
+    <div class="mtit" id="modalTitre">Ajouter une entreprise</div>
+    <input type="hidden" id="emOriginal">
+    <div class="mfld">
+      <label class="flbl">Soci&eacute;t&eacute; <span style="color:var(--dng)">*</span></label>
+      <input id="emSociete" class="finp" placeholder="Nom de l&rsquo;entreprise">
+    </div>
+    <div class="mfld">
+      <label class="flbl">Adresse postale</label>
+      <input id="emAdresse" class="finp" placeholder="14 rue Alfred Kastler">
+    </div>
+    <div class="mfld">
+      <label class="flbl">Code postal + Ville</label>
+      <input id="emCp" class="finp" placeholder="14000 Caen">
+    </div>
+    <div class="mfld">
+      <label class="flbl">Email destinataire</label>
+      <input id="emEmail" class="finp" placeholder="contact@entreprise.fr">
+    </div>
+    <div class="mfoo">
+      <button class="btn btn-o btn-sm" onclick="hideModal('ovEntreprise')">Annuler</button>
+      <button class="btn btn-g btn-sm" onclick="sauvegarderEntreprise()">Sauvegarder</button>
+    </div>
+  </div>
+</div>
+
 <script>
+/* ── Tabs ──────────────────────────────────────────────────── */
+function switchTab(btn) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('on'));
+  document.querySelectorAll('.pane').forEach(p => p.classList.remove('on'));
+  btn.classList.add('on');
+  document.getElementById(btn.dataset.tab).classList.add('on');
+}
+
+/* ── Thème dark / light ────────────────────────────────────── */
+function toggleTheme() {
+  var light = document.documentElement.getAttribute('data-theme') !== 'light';
+  document.documentElement.setAttribute('data-theme', light ? 'light' : 'dark');
+  document.getElementById('themeBtn').innerHTML = light ? '&#9728; Light' : '&#9790; Dark';
+}
+
+/* ── Modals custom ─────────────────────────────────────────── */
+function showModal(id) { document.getElementById(id).classList.add('on'); }
+function hideModal(id) { document.getElementById(id).classList.remove('on'); }
+
+/* ── Cards collapsibles ────────────────────────────────────── */
+function toggleCard(hdr) {
+  hdr.classList.toggle('open');
+  hdr.nextElementSibling.classList.toggle('open');
+}
+
+/* ── Multi-select dropdown ─────────────────────────────────── */
+function toggleMs(id) {
+  var btn   = document.querySelector('#' + id + ' .ms-btn');
+  var panel = document.querySelector('#' + id + ' .ms-panel');
+  var wasOpen = panel.classList.contains('open');
+  // Fermer tous
+  document.querySelectorAll('.ms-panel').forEach(p => p.classList.remove('open'));
+  document.querySelectorAll('.ms-btn').forEach(b => b.classList.remove('open'));
+  if (!wasOpen) { panel.classList.add('open'); btn.classList.add('open'); }
+}
+document.addEventListener('click', function(e) {
+  if (!e.target.closest('.ms')) {
+    document.querySelectorAll('.ms-panel').forEach(p => p.classList.remove('open'));
+    document.querySelectorAll('.ms-btn').forEach(b => b.classList.remove('open'));
+  }
+});
+function getChecked(name) {
+  return Array.from(document.querySelectorAll('input[name="' + name + '"]:checked')).map(c => c.value);
+}
+function updateMsLabel(name, lblId) {
+  var n = getChecked(name).length;
+  document.getElementById(lblId).textContent = n ? n + ' s\u00e9lectionn\u00e9(s)' : 'Aucun s\u00e9lectionn\u00e9';
+}
+
+/* ── Tracker ───────────────────────────────────────────────── */
 const STATUTS = ['g\u00e9n\u00e9r\u00e9','envoy\u00e9','relanc\u00e9','entretien','accept\u00e9','refus\u00e9'];
 
 async function loadTracker() {
   const rows = await fetch('/api/tracker').then(r => r.json()).catch(() => []);
-  const cnt = s => rows.filter(r => r.statut === s).length;
-  document.getElementById('st-total').textContent     = 'Total : '      + rows.length;
-  document.getElementById('st-genere').textContent    = 'G\u00e9n\u00e9r\u00e9s : '    + cnt('g\u00e9n\u00e9r\u00e9');
-  document.getElementById('st-envoye').textContent    = 'Envoy\u00e9s : '    + cnt('envoy\u00e9');
-  document.getElementById('st-entretien').textContent = 'Entretiens : ' + cnt('entretien');
-  document.getElementById('st-accepte').textContent   = 'Accept\u00e9s : '   + cnt('accept\u00e9');
+  const cnt  = s => rows.filter(r => r.statut === s).length;
+  document.getElementById('st-total').textContent     = 'Total\u00a0: ' + rows.length;
+  document.getElementById('st-genere').textContent    = 'G\u00e9n\u00e9r\u00e9s\u00a0: ' + cnt('g\u00e9n\u00e9r\u00e9');
+  document.getElementById('st-envoye').textContent    = 'Envoy\u00e9s\u00a0: ' + cnt('envoy\u00e9');
+  document.getElementById('st-entretien').textContent = 'Entretiens\u00a0: ' + cnt('entretien');
+  document.getElementById('st-accepte').textContent   = 'Accept\u00e9s\u00a0: ' + cnt('accept\u00e9');
   document.getElementById('trackerBody').innerHTML = rows.length
-    ? rows.map(function(row) { return '<tr>'
-        + '<td><strong>' + esc(row.societe) + '</strong></td>'
-        + '<td><small class="text-muted">' + esc(row.email_destinataire||'') + '</small></td>'
-        + '<td><small>' + (row.date_generation||'') + '</small></td>'
-        + '<td><small>' + (row.date_envoi||'\u2013') + '</small></td>'
-        + '<td><select class="form-select form-select-sm" style="width:115px" data-societe="' + esc(row.societe) + '" onchange="updateStatut(this)">'
-        + STATUTS.map(function(s) { return '<option' + (s===row.statut?' selected':'') + '>' + s + '</option>'; }).join('')
-        + '</select></td>'
-        + '<td><small class="text-muted">' + esc(row.notes||'') + '</small></td>'
-        + '<td><button class="btn btn-sm btn-outline-secondary py-0 px-2" data-societe="' + esc(row.societe) + '" onclick="editNote(this)">\u{1F4DD}</button></td>'
-        + '</tr>'; }).join('')
-    : '<tr><td colspan="7" class="text-center text-muted py-3">Aucune candidature dans le tracker.</td></tr>';
-}
-
-async function loadCsv() {
-  const rows = await fetch('/api/csv').then(r => r.json()).catch(() => []);
-  document.getElementById('csvBody').innerHTML = rows.length
-    ? rows.map(function(r) { return '<tr>'
-        + '<td>' + esc(r.titre||'') + '</td>'
-        + '<td>' + esc(r.societe||'') + '</td>'
-        + '<td>' + esc(r.adresse_postale||'') + '</td>'
-        + '<td>' + esc(r.code_postal||'') + '</td>'
-        + '<td><small>' + esc(r.email_destinataire||'') + '</small></td>'
-        + '</tr>'; }).join('')
-    : '<tr><td colspan="5" class="text-center text-muted py-3">CSV vide ou introuvable.</td></tr>';
+    ? rows.map(function(r) {
+        return '<tr>'
+          + '<td><strong>' + esc(r.societe) + '</strong></td>'
+          + '<td style="font-size:.77rem;color:var(--txt-d)">' + esc(r.email_destinataire || '') + '</td>'
+          + '<td style="font-size:.77rem">' + (r.date_generation || '') + '</td>'
+          + '<td style="font-size:.77rem">' + (r.date_envoi || '\u2013') + '</td>'
+          + '<td><select class="stat-sel" data-societe="' + esc(r.societe) + '" onchange="updateStatut(this)">'
+          + STATUTS.map(s => '<option' + (s === r.statut ? ' selected' : '') + '>' + s + '</option>').join('')
+          + '</select></td>'
+          + '<td style="font-size:.77rem;color:var(--txt-d)">' + esc(r.notes || '') + '</td>'
+          + '<td><div class="ra">'
+          + '<button class="btn btn-o btn-xs" data-societe="' + esc(r.societe) + '" onclick="editNote(this)">Note</button>'
+          + '<button class="btn btn-o btn-xs" onclick="ouvrirDossier(\'' + esc(r.societe).replace(/'/g,"&#39;") + '\')">Dossier</button>'
+          + '<button class="btn btn-d btn-xs" onclick="supprimerTracker(\'' + esc(r.societe).replace(/'/g,"&#39;") + '\')">\u2715</button>'
+          + '</div></td></tr>';
+      }).join('')
+    : '<tr><td colspan="7" class="empty">Aucune candidature dans le tracker.</td></tr>';
 }
 
 async function updateStatut(sel) {
-  await fetch('/api/update', {
-    method: 'POST', headers: {'Content-Type':'application/json'},
-    body: JSON.stringify({societe: sel.dataset.societe, statut: sel.value})
-  });
+  await fetch('/api/update', { method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({ societe: sel.dataset.societe, statut: sel.value }) });
   loadTracker();
 }
 
 async function editNote(btn) {
-  var note = prompt('Note pour ' + btn.dataset.societe + ' :');
+  var note = prompt('Note pour ' + btn.dataset.societe + '\u00a0:');
   if (note === null) return;
-  await fetch('/api/update', {
-    method: 'POST', headers: {'Content-Type':'application/json'},
-    body: JSON.stringify({societe: btn.dataset.societe, notes: note})
-  });
+  await fetch('/api/update', { method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({ societe: btn.dataset.societe, notes: note }) });
   loadTracker();
 }
 
+async function supprimerTracker(societe) {
+  if (!confirm('Supprimer \u00ab\u00a0' + societe + '\u00a0\u00bb du tracker\u00a0?')) return;
+  var res = await fetch('/api/del-tracker', { method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({ societe }) }).then(r => r.json()).catch(() => ({ error: 'r\u00e9seau' }));
+  if (res.ok) loadTracker(); else alert('Erreur\u00a0: ' + (res.error || 'inconnue'));
+}
+
+/* ── Buckets ───────────────────────────────────────────────── */
+var _currentBucket = 'avec_offre';
+var _buckets = [];
+var _pendingAction = null;
+var _pendingParams = null;
+
+async function loadBuckets() {
+  _buckets = await fetch('/api/buckets').then(r => r.json()).catch(() => []);
+  renderBucketPills();
+  updateBucketModalSelect();
+}
+
+function renderBucketPills() {
+  document.getElementById('bucketPills').innerHTML = _buckets.map(function(b) {
+    return '<button class="bkt-pill' + (b.name === _currentBucket ? ' on' : '') + '" onclick="selectBucket(\'' + b.name + '\')">' + esc(b.label) + '</button>';
+  }).join('');
+  var cur = _buckets.find(b => b.name === _currentBucket);
+  var del = document.getElementById('btnDelBucket');
+  if (del) del.style.display = (cur && !cur.protected) ? '' : 'none';
+}
+
+function selectBucket(name) { _currentBucket = name; renderBucketPills(); loadOffres(); }
+
+async function clearBucket() {
+  var cur = _buckets.find(b => b.name === _currentBucket);
+  if (!confirm('Vider le r\u00e9pertoire \u00ab\u00a0' + (cur ? cur.label : _currentBucket) + '\u00a0\u00bb\u00a0?')) return;
+  var res = await fetch('/api/clear-bucket', { method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({ name: _currentBucket }) }).then(r => r.json()).catch(() => ({ error: 'r\u00e9seau' }));
+  if (res.ok) loadOffres(); else alert('Erreur\u00a0: ' + (res.error || 'inconnue'));
+}
+
+async function deleteBucket() {
+  var cur = _buckets.find(b => b.name === _currentBucket);
+  if (!cur || cur.protected) return;
+  if (!confirm('Supprimer le r\u00e9pertoire \u00ab\u00a0' + cur.label + '\u00a0\u00bb et toutes ses entr\u00e9es\u00a0?')) return;
+  var res = await fetch('/api/del-bucket', { method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({ name: _currentBucket }) }).then(r => r.json()).catch(() => ({ error: 'r\u00e9seau' }));
+  if (res.ok) { _currentBucket = 'avec_offre'; await loadBuckets(); loadOffres(); }
+  else alert('Erreur\u00a0: ' + (res.error || 'inconnue'));
+}
+
+function updateBucketModalSelect() {
+  var sel = document.getElementById('bucketModalSel');
+  if (!sel) return;
+  sel.innerHTML = _buckets.map(b => '<option value="' + b.name + '">' + esc(b.label) + '</option>').join('')
+    + '<option value="__new__">+ Cr\u00e9er un r\u00e9pertoire\u2026</option>';
+}
+
+function onBucketModalChange() {
+  document.getElementById('newBucketDiv').style.display =
+    document.getElementById('bucketModalSel').value === '__new__' ? '' : 'none';
+}
+
+function showBucketModal(action, params, defaultBucket) {
+  _pendingAction = action;
+  _pendingParams = params;
+  updateBucketModalSelect();
+  var sel = document.getElementById('bucketModalSel');
+  sel.value = defaultBucket || 'avec_offre';
+  if (!sel.value && sel.options.length) sel.value = sel.options[0].value;
+  onBucketModalChange();
+  document.getElementById('newBucketName').value = '';
+  showModal('ovBucket');
+}
+
+async function confirmRunWithBucket() {
+  var sel = document.getElementById('bucketModalSel');
+  var bucket;
+  if (sel.value === '__new__') {
+    var nom = document.getElementById('newBucketName').value.trim();
+    if (!nom) { alert('Entrez un nom de r\u00e9pertoire.'); return; }
+    var res = await fetch('/api/create-bucket', { method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ name: nom }) }).then(r => r.json()).catch(() => ({ error: 'r\u00e9seau' }));
+    if (!res.ok) { alert('Erreur cr\u00e9ation\u00a0: ' + (res.error || 'inconnue')); return; }
+    bucket = res.name;
+    await loadBuckets();
+  } else {
+    bucket = sel.value;
+  }
+  hideModal('ovBucket');
+  _pendingParams.bucket = bucket;
+  run(_pendingAction, _pendingParams);
+}
+
+/* ── Entreprises scrap\u00e9es (onglet Entreprises) ─────────────── */
+async function loadOffres() {
+  const [offres, csv] = await Promise.all([
+    fetch('/api/offres?bucket=' + encodeURIComponent(_currentBucket)).then(r => r.json()).catch(() => []),
+    fetch('/api/csv').then(r => r.json()).catch(() => [])
+  ]);
+  const dejaLa = new Set(csv.map(r => (r.societe || '').toLowerCase()));
+
+  document.getElementById('offresBody').innerHTML = offres.length
+    ? offres.map(function(row, idx) {
+        row = Object.assign({}, row, { bucket: _currentBucket });
+        var deja     = dejaLa.has((row.societe || '').toLowerCase());
+        var hasOffre = !!(row.url);
+        var detId    = 'od' + idx;
+
+        var mainRow = '<tr class="erow" onclick="toggleDet(\'' + detId + '\')">'
+          + '<td><strong>' + esc(row.societe || '') + '</strong></td>'
+          + '<td style="font-size:.78rem">' + esc(row.code_postal || '') + '</td>'
+          + '<td style="font-size:.78rem;color:var(--txt-d)">' + esc(row.domaine || '') + '</td>'
+          + '<td>' + (hasOffre
+              ? '<span class="bdg bdg-offre">offre</span>'
+              : '<span class="bdg bdg-ent">entreprise</span>') + '</td>'
+          + '<td><div class="ra">'
+          + (deja
+              ? '<span class="bdg bdg-done">\u2713 Ajout\u00e9e</span>'
+              : '<button class="btn btn-g btn-xs" onclick="event.stopPropagation();ajouterOffre(this,'
+                + JSON.stringify(row).replace(/'/g, "&#39;") + ')">\u2192 Valider</button>')
+          + '</div></td>'
+          + '</tr>';
+
+        var details = [];
+        if (row.adresse_postale)   details.push(['Adresse', esc(row.adresse_postale)]);
+        if (row.email_destinataire) details.push(['Email',
+          '<a href="mailto:' + esc(row.email_destinataire) + '" onclick="event.stopPropagation()">'
+          + esc(row.email_destinataire) + '</a>']);
+        if (row.url) details.push(['Offre',
+          '<a href="' + esc(row.url) + '" target="_blank" onclick="event.stopPropagation()">'
+          + esc(row.url) + '</a>']);
+
+        var detRow = '<tr id="' + detId + '" class="drow" style="display:none">'
+          + '<td colspan="5"><div class="det-box">'
+          + (details.length
+              ? details.map(d => '<div class="dl"><span class="dk">' + d[0] + '</span><span class="dv">' + d[1] + '</span></div>').join('')
+              : '<span style="color:var(--txt-m);font-size:.78rem">Aucun d\u00e9tail disponible.</span>')
+          + '</div></td></tr>';
+
+        return mainRow + detRow;
+      }).join('')
+    : '<tr><td colspan="5" class="empty">Aucune entreprise. Lancez un scraper depuis l\'onglet Actions.</td></tr>';
+}
+
+function toggleDet(id) {
+  var el = document.getElementById(id);
+  if (!el) return;
+  var hide = el.style.display !== 'none';
+  el.style.display = hide ? 'none' : '';
+  if (el.previousElementSibling) el.previousElementSibling.classList.toggle('xp', !hide);
+}
+
+async function ajouterOffre(btn, row) {
+  btn.disabled = true;
+  btn.textContent = '\u2026';
+  var res = await fetch('/api/move-offre', { method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify(row) }).then(r => r.json()).catch(() => ({ error: 'r\u00e9seau' }));
+  if (res.ok) {
+    btn.closest('.ra').innerHTML = '<span class="bdg bdg-done">\u2713 Ajout\u00e9e</span>';
+    loadCsv();
+  } else {
+    btn.disabled = false;
+    btn.textContent = '\u2192 Valider';
+    alert('Erreur\u00a0: ' + (res.error || res.info || 'inconnue'));
+  }
+}
+
+/* ── En validation (entreprises.csv) ─────────────────────── */
+async function loadCsv() {
+  const rows = await fetch('/api/csv').then(r => r.json()).catch(() => []);
+  document.getElementById('csvBody').innerHTML = rows.length
+    ? rows.map(function(r) {
+        var adr = [r.adresse_postale, r.code_postal].filter(Boolean).join(' &mdash; ');
+        return '<tr>'
+          + '<td><strong>' + esc(r.societe || '') + '</strong></td>'
+          + '<td style="font-size:.78rem;color:var(--txt-d)">' + (adr || '<span style="color:var(--txt-m)">\u2014</span>') + '</td>'
+          + '<td style="font-size:.78rem">'
+          + (r.email_destinataire
+              ? '<a href="mailto:' + esc(r.email_destinataire) + '">' + esc(r.email_destinataire) + '</a>'
+              : '<span style="color:var(--txt-m)">\u2014</span>')
+          + '</td>'
+          + '<td><div class="ra">'
+          + '<button class="btn btn-o btn-xs" onclick=\'ouvrirModif(' + JSON.stringify(r) + ')\'>Modifier</button>'
+          + '<button class="btn btn-d btn-xs" onclick="supprimerEntreprise(\'' + esc(r.societe || '') + '\')">\u2715</button>'
+          + '</div></td></tr>';
+      }).join('')
+    : '<tr><td colspan="4" class="empty">CSV vide ou introuvable.</td></tr>';
+}
+
+function ouvrirAjout() {
+  document.getElementById('modalTitre').textContent = 'Ajouter une entreprise';
+  document.getElementById('emOriginal').value = '';
+  ['emSociete','emAdresse','emCp','emEmail'].forEach(id => document.getElementById(id).value = '');
+  showModal('ovEntreprise');
+}
+
+function ouvrirModif(r) {
+  document.getElementById('modalTitre').textContent = 'Modifier \u2014 ' + (r.societe || '');
+  document.getElementById('emOriginal').value = r.societe || '';
+  document.getElementById('emSociete').value  = r.societe || '';
+  document.getElementById('emAdresse').value  = r.adresse_postale || '';
+  document.getElementById('emCp').value       = r.code_postal || '';
+  document.getElementById('emEmail').value    = r.email_destinataire || '';
+  showModal('ovEntreprise');
+}
+
+async function sauvegarderEntreprise() {
+  var societe = document.getElementById('emSociete').value.trim();
+  if (!societe) { alert('Le nom de la soci\u00e9t\u00e9 est requis.'); return; }
+  var original = document.getElementById('emOriginal').value;
+  var payload  = {
+    societe,
+    adresse_postale:    document.getElementById('emAdresse').value.trim(),
+    code_postal:        document.getElementById('emCp').value.trim(),
+    email_destinataire: document.getElementById('emEmail').value.trim()
+  };
+  if (original) payload.original = original;
+  var res = await fetch(original ? '/api/upd-entreprise' : '/api/add-entreprise',
+    { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload) })
+    .then(r => r.json()).catch(() => ({ error: 'r\u00e9seau' }));
+  if (res.ok) { hideModal('ovEntreprise'); loadCsv(); }
+  else alert('Erreur\u00a0: ' + (res.error || 'inconnue'));
+}
+
+async function supprimerEntreprise(societe) {
+  if (!confirm('Supprimer \u00ab\u00a0' + societe + '\u00a0\u00bb du CSV\u00a0?')) return;
+  var res = await fetch('/api/del-entreprise', { method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({ societe }) }).then(r => r.json()).catch(() => ({ error: 'r\u00e9seau' }));
+  if (res.ok) loadCsv(); else alert('Erreur\u00a0: ' + (res.error || 'inconnue'));
+}
+
+/* ── Actions ───────────────────────────────────────────────── */
 function run(action, extra) {
   extra = extra || {};
-  document.querySelector('[data-bs-target="#pActions"]').click();
+  var actTab = document.querySelector('[data-tab="pActions"]');
+  if (actTab) { actTab.click(); }
   var cons = document.getElementById('console');
   cons.textContent = '> ' + action + '\n';
-  var params = new URLSearchParams(Object.assign({action: action}, extra));
+  var params = new URLSearchParams(Object.assign({ action }, extra));
   var src = new EventSource('/api/run?' + params);
   src.onmessage = function(e) {
-    if (e.data === '[DONE]') { src.close(); loadTracker(); loadCsv(); return; }
+    if (e.data === '[DONE]') { src.close(); loadTracker(); loadCsv(); loadOffres(); return; }
     cons.textContent += e.data + '\n';
     cons.scrollTop = cons.scrollHeight;
   };
@@ -191,19 +904,51 @@ function run(action, extra) {
 }
 
 function confirmEnvoi() {
-  if (confirm('Envoyer les emails \u00e0 toutes les entreprises du CSV ?\nCette action est irr\u00e9versible.'))
+  if (confirm('Envoyer les emails \u00e0 toutes les entreprises du CSV\u00a0?\nCette action est irr\u00e9versible.'))
     run('envoi');
 }
 
+function onVilleChange() {
+  var isOther = document.getElementById('scVilleSelect').value === '';
+  document.getElementById('scVilleManuel').style.display = isOther ? '' : 'none';
+}
+
+function onDeptChange() {
+  var isOther = document.getElementById('enDept').value === '';
+  document.getElementById('enDeptManuelDiv').style.display = isOther ? '' : 'none';
+}
+
 function runScraper() {
-  var ville = document.getElementById('scVille').value.trim();
+  var sel = document.getElementById('scVilleSelect');
+  var ville, cp;
+  if (sel.value) { var p = sel.value.split('|'); ville = p[0]; cp = p[1]; }
+  else { ville = document.getElementById('scVille').value.trim(); cp = document.getElementById('scCP').value.trim(); }
   if (!ville) { alert('Entrez une ville.'); return; }
-  run('scraper', {
-    ville: ville,
-    codepostal: document.getElementById('scCP').value.trim(),
-    rayon:      document.getElementById('scRayon').value.trim(),
-    romes:      document.getElementById('scRomes').value.trim()
-  });
+  var romes = getChecked('rome');
+  if (!romes.length) { alert('S\u00e9lectionnez au moins un code ROME.'); return; }
+  var domaine = romes.length > 3 ? romes.length + ' domaines' : romes.join(', ');
+  showBucketModal('scraper', {
+    ville, codepostal: cp,
+    rayon: document.getElementById('scRayon').value.trim(),
+    romes: romes.join(','), domaine
+  }, 'avec_offre');
+}
+
+function runScraperEntreprises() {
+  var deptSel = document.getElementById('enDept').value;
+  var dept = deptSel || document.getElementById('enDeptManuel').value.trim();
+  if (!dept) { alert('Entrez un d\u00e9partement.'); return; }
+  var apes = getChecked('ape');
+  if (!apes.length) { alert('S\u00e9lectionnez au moins un code APE.'); return; }
+  var domaine = apes.length > 2 ? apes.length + ' secteurs' : apes.join(', ');
+  showBucketModal('scraper-entreprises', { departement: dept, ape: apes.join(','), domaine }, 'sans_offre');
+}
+
+function ouvrirDossier(societe) {
+  fetch('/api/open-folder?' + new URLSearchParams({ societe }))
+    .then(r => r.json())
+    .then(res => { if (!res.ok) alert('Dossier introuvable\u00a0: ' + societe); })
+    .catch(() => alert('Erreur r\u00e9seau.'));
 }
 
 function clearConsole() { document.getElementById('console').textContent = ''; }
@@ -212,9 +957,24 @@ function esc(s) {
   return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
-loadTracker();
-loadCsv();
-document.querySelector('[data-bs-target="#pCsv"]').addEventListener('shown.bs.tab', loadCsv);
+/* ── Init ──────────────────────────────────────────────────── */
+document.addEventListener('DOMContentLoaded', function() {
+  // Cocher tous les ROME informatique par défaut
+  ['M1805','M1810','M1802','M1806','M1801','M1803','M1804','M1808','M1807'].forEach(function(v) {
+    var cb = document.getElementById('r' + v); if (cb) cb.checked = true;
+  });
+  updateMsLabel('rome', 'msRomeLbl');
+  // Cocher 62.01Z par défaut pour APE
+  var firstApe = document.getElementById('a6201Z');
+  if (firstApe) { firstApe.checked = true; updateMsLabel('ape', 'msApeLbl'); }
+  // Listeners multi-select
+  document.querySelectorAll('input[name="rome"]').forEach(cb => cb.addEventListener('change', () => updateMsLabel('rome','msRomeLbl')));
+  document.querySelectorAll('input[name="ape"]').forEach(cb => cb.addEventListener('change', () => updateMsLabel('ape','msApeLbl')));
+  // Charger les données
+  loadBuckets().then(loadOffres);
+  loadTracker();
+  loadCsv();
+});
 </script>
 </body>
 </html>

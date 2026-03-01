@@ -28,7 +28,7 @@ Copier `config/config.properties.example` en `config/config.properties` et rense
 | `gmail.user` | Adresse Gmail |
 | `gmail.password` | Mot de passe d'application (16 caractères) |
 | `email.sujet` | Sujet de l'email (supporte `[societe]`) |
-| `email.corps` | Corps de l'email (supporte `[societe]`, `[titre]`) |
+| `email.corps` | Corps de l'email (supporte `[societe]`) |
 | `scraper.ville` | Ville de recherche (ex : `Lyon`) |
 | `scraper.codepostal` | Code postal (ex : `69001`) |
 | `scraper.rayon` | Rayon en km (défaut : `30`) |
@@ -51,7 +51,7 @@ Monsieur,Acme Corp,12 rue de la Paix,75001,contact@acme.fr
 
 ### Placeholders dans `templates/lettre_modele.docx`
 
-`[titre]` `[societe]` `[adresse_postale]` `[code_postal]`
+`[societe]` `[adresse_postale]` `[code_postal]`
 
 ## Utilisation
 

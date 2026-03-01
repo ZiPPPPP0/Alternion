@@ -18,7 +18,7 @@ import java.util.*;
  */
 public class EnvoiCandidatures {
 
-    private static final String DOSSIER_BASE = "C:\\Users\\camil\\Desktop\\Alternance_2026";
+    private static final String DOSSIER_BASE = "outputs";
     private static final String CSV_FILE     = "data/entreprises.csv";
     private static final String CONFIG_FILE  = "config/config.properties";
     private static final String NOM_LM      = "LM_Camille_Marsac.pdf";
@@ -130,14 +130,13 @@ public class EnvoiCandidatures {
 
         for (Map<String, String> ligne : lignes) {
             String societe    = ligne.get("societe");
-            String titre      = ligne.getOrDefault("titre", "");
             String emailDest  = ligne.get("email_destinataire").trim();
             String nomDossier = societe.replaceAll("[\\\\/:*?\"<>|]", "_").trim();
             File dossier      = new File(DOSSIER_BASE, nomDossier);
 
             try {
-                String sujet = personaliser(sujetTmpl, societe, titre);
-                String corps = personaliser(corpsTmpl, societe, titre);
+                String sujet = personaliser(sujetTmpl, societe);
+                String corps = personaliser(corpsTmpl, societe);
 
                 Message message = new MimeMessage(session);
                 message.setFrom(new InternetAddress(gmailUser));
@@ -185,10 +184,8 @@ public class EnvoiCandidatures {
     // -------------------------------------------------------------------------
     // Remplace les placeholders dans le sujet/corps de l'email
     // -------------------------------------------------------------------------
-    private static String personaliser(String tmpl, String societe, String titre) {
-        return tmpl
-            .replace("[societe]", societe)
-            .replace("[titre]",   titre);
+    private static String personaliser(String tmpl, String societe) {
+        return tmpl.replace("[societe]", societe);
     }
 
     // -------------------------------------------------------------------------

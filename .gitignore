@@ -15,7 +15,13 @@ target/
 # ── Fichiers générés / temporaires ────────────────────────────────────────────
 *.zip
 lettre_personnalisee.docx
+outputs/
 
 # ── OS ────────────────────────────────────────────────────────────────────────
 .DS_Store
 Thumbs.db
+
+# ── Divers ────────────────────────────────────────────────────────────────────
+.claude/
+.gitignore
+ATrier.txt

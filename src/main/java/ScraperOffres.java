@@ -27,9 +27,11 @@ import java.util.*;
  */
 public class ScraperOffres {
 
-    private static final String GEO_API    = "https://api-adresse.data.gouv.fr/search/";
-    private static final String LBA_API    = "https://labonnealternance.apprentissage.beta.gouv.fr/api/v1/jobs/search";
-    private static final String CSV_FILE   = "data/entreprises.csv";
+    private static final String GEO_API     = "https://api-adresse.data.gouv.fr/search/";
+    private static final String LBA_API     = "https://labonnealternance.apprentissage.beta.gouv.fr/api/v1/jobsEtFormations";
+    private static final String CSV_FILE    = "data/entreprises.csv";
+    static final String OFFRES_DIR          = "data/offres";
+    static final String OFFRES_HEADER       = "societe,adresse_postale,code_postal,email_destinataire,domaine,url";
     private static final String CONFIG_FILE = "config/config.properties";
 
     public static void main(String[] args) throws Exception {
@@ -43,6 +45,11 @@ public class ScraperOffres {
         String codePostal = System.getProperty("scraper.codepostal", config.getProperty("scraper.codepostal", "")).trim();
         String rayon      = System.getProperty("scraper.rayon",      config.getProperty("scraper.rayon",      "30")).trim();
         String romes      = System.getProperty("scraper.romes",      config.getProperty("scraper.romes",      "")).trim();
+        String domaine    = System.getProperty("scraper.domaine",    config.getProperty("scraper.domaine",    "")).trim();
+        String bucket     = System.getProperty("scraper.bucket",    config.getProperty("scraper.bucket",    "avec_offre")).trim();
+        bucket = bucket.replaceAll("[^a-zA-Z0-9_\\-]", "_");
+        new File(OFFRES_DIR).mkdirs();
+        String offresFile = OFFRES_DIR + "/" + bucket + ".csv";
 
         // Saisie interactive seulement si pas en mode auto
         if (!autoMode) {
@@ -61,16 +68,16 @@ public class ScraperOffres {
 
         // --- Géocodage ---
         out.println("\nGéolocalisation de « " + ville + " " + codePostal + " »...");
-        double[] coords = geocoder(ville, codePostal);
+        String[] coords = geocoder(ville, codePostal); // [lat, lon, insee]
         if (coords == null) {
             System.err.println("Impossible de géolocaliser cette ville. Vérifiez le nom.");
             System.exit(1);
         }
-        out.printf("Coordonnées : %.4f, %.4f%n%n", coords[0], coords[1]);
+        out.printf("Coordonnées : %s, %s  (INSEE : %s)%n%n", coords[0], coords[1], coords[2]);
 
         // --- Appel La Bonne Alternance ---
         out.println("Recherche d'offres (rayon " + rayon + " km)...");
-        List<Map<String, String>> offres = rechercherOffres(coords[0], coords[1], rayon, romes, out);
+        List<Map<String, String>> offres = rechercherOffres(coords[0], coords[1], coords[2], rayon, romes, out);
 
         if (offres.isEmpty()) {
             out.println("Aucune entreprise trouvée. Essayez d'autres codes ROME ou un rayon plus grand.");
@@ -111,22 +118,24 @@ public class ScraperOffres {
         Set<String> existants = chargerSocietesExistantes();
         int ajouts = 0, ignores = 0;
 
-        boolean ecrireHeader = !new File(CSV_FILE).exists() || new File(CSV_FILE).length() == 0;
+        migrerOffresCSV(offresFile);
+        boolean ecrireHeader = !new File(offresFile).exists() || new File(offresFile).length() == 0;
         try (PrintWriter pw = new PrintWriter(new OutputStreamWriter(
-                new FileOutputStream(CSV_FILE, true), StandardCharsets.UTF_8))) {
+                new FileOutputStream(offresFile, true), StandardCharsets.UTF_8))) {
             if (ecrireHeader)
-                pw.println("titre,societe,adresse_postale,code_postal,email_destinataire");
+                pw.println(OFFRES_HEADER);
             for (Map<String, String> o : selectionnes) {
                 String societe = o.getOrDefault("societe", "").trim();
                 if (societe.isEmpty() || existants.contains(societe.toLowerCase())) {
                     ignores++; continue;
                 }
-                pw.printf("%s,%s,%s,%s,%s%n",
-                    echapper(o.getOrDefault("titre", "")),
+                pw.printf("%s,%s,%s,%s,%s,%s%n",
                     echapper(societe),
                     echapper(o.getOrDefault("adresse_postale", "")),
                     echapper(o.getOrDefault("code_postal", "")),
-                    echapper(o.getOrDefault("email_destinataire", "")));
+                    echapper(o.getOrDefault("email_destinataire", "")),
+                    echapper(domaine),
+                    echapper(o.getOrDefault("url", "")));
                 ajouts++;
             }
         }
@@ -135,13 +144,14 @@ public class ScraperOffres {
         out.println("Ajoutées        : " + ajouts);
         if (ignores > 0) out.println("Ignorées (déjà dans le CSV) : " + ignores);
         if (ajouts > 0)
-            out.println("\nRelancez LettreMailing pour générer les lettres correspondantes.");
+            out.println("\nOuvrez le Dashboard → onglet Offres pour ajouter les entreprises souhaitées.");
     }
 
     // -------------------------------------------------------------------------
     // Géocodage via api-adresse.data.gouv.fr
     // -------------------------------------------------------------------------
-    private static double[] geocoder(String ville, String codePostal) throws Exception {
+    /** Retourne [lat, lon, insee] ou null si introuvable. */
+    private static String[] geocoder(String ville, String codePostal) throws Exception {
         String q = ville + (codePostal.isEmpty() ? "" : " " + codePostal);
         String url = GEO_API + "?q=" + URLEncoder.encode(q, StandardCharsets.UTF_8)
                    + "&limit=1&type=municipality";
@@ -150,23 +160,28 @@ public class ScraperOffres {
         JSONArray features = new JSONObject(body).optJSONArray("features");
         if (features == null || features.length() == 0) return null;
 
-        JSONArray coords = features.getJSONObject(0)
-            .getJSONObject("geometry")
-            .getJSONArray("coordinates");
+        JSONObject feature = features.getJSONObject(0);
+        JSONArray coords   = feature.getJSONObject("geometry").getJSONArray("coordinates");
+        String insee       = feature.getJSONObject("properties").optString("citycode", "");
 
-        return new double[]{ coords.getDouble(1), coords.getDouble(0) }; // [lat, lon]
+        return new String[]{
+            String.valueOf(coords.getDouble(1)), // lat
+            String.valueOf(coords.getDouble(0)), // lon
+            insee
+        };
     }
 
     // -------------------------------------------------------------------------
     // Recherche La Bonne Alternance
     // -------------------------------------------------------------------------
     private static List<Map<String, String>> rechercherOffres(
-            double lat, double lon, String rayon, String romes, PrintStream out) throws Exception {
+            String lat, String lon, String insee, String rayon, String romes, PrintStream out) throws Exception {
 
         String url = LBA_API
             + "?romes=" + URLEncoder.encode(romes, StandardCharsets.UTF_8)
             + "&latitude=" + lat
             + "&longitude=" + lon
+            + "&insee=" + URLEncoder.encode(insee, StandardCharsets.UTF_8)
             + "&radius=" + rayon
             + "&caller=AlternionApp";
 
@@ -186,21 +201,15 @@ public class ScraperOffres {
         try {
             JSONObject root = new JSONObject(json);
 
-            // Deux sources de données dans la réponse LBA
-            String[] sources = {"lbaCompanies", "matchaJobs", "peJobs"};
-            JSONObject results = root.optJSONObject("results");
-            if (results == null) {
-                // Certaines versions renvoient directement un tableau
-                JSONArray arr = root.optJSONArray("results");
-                if (arr != null) extraireTableau(arr, result);
-                return result;
-            }
-
-            for (String source : sources) {
-                JSONObject src = results.optJSONObject(source);
-                if (src == null) continue;
-                JSONArray arr = src.optJSONArray("results");
-                if (arr != null) extraireTableau(arr, result);
+            // Structure v1/jobsEtFormations : root.jobs.{lbaCompanies, matchas, peJobs, partnerJobs}.results[]
+            JSONObject jobs = root.optJSONObject("jobs");
+            if (jobs != null) {
+                for (String source : new String[]{"lbaCompanies", "matchas", "peJobs", "partnerJobs"}) {
+                    JSONObject src = jobs.optJSONObject(source);
+                    if (src == null) continue;
+                    JSONArray arr = src.optJSONArray("results");
+                    if (arr != null) extraireTableau(arr, result);
+                }
             }
 
         } catch (Exception e) {
@@ -222,26 +231,45 @@ public class ScraperOffres {
         try {
             Map<String, String> o = new LinkedHashMap<>();
 
-            // Nom société (plusieurs chemins possibles selon la version de l'API)
+            // Nom société
             String nom = optString(obj, "company.name", "entreprise.nom",
                                        "company.siret", "enseigne");
             if (nom.isEmpty()) return null;
             o.put("societe", nom);
 
-            // Adresse
+            // Adresse complète
             String adresse = optString(obj, "place.fullAddress", "place.address",
                                            "lieuTravail.libelle", "adresse");
-            String cp = optString(obj, "place.zipCode", "lieuTravail.codePostal",
-                                       "codePostal");
-            // Si l'adresse contient déjà le CP, ne pas le dupliquer
-            if (!cp.isEmpty() && adresse.contains(cp)) cp = "";
+
+            // Code postal — plusieurs chemins selon la source (lbaCompanies vs peJobs)
+            String cp = optString(obj, "place.zipCode", "place.zip", "place.cedex",
+                                       "lieuTravail.codePostal", "codePostal");
+
+            // Dernier recours : extraire CP (5 chiffres) + ville depuis l'adresse
+            // ex: "39 RUE X 14000 CAEN" → adresse="39 RUE X", cp="14000 CAEN"
+            if (cp.isEmpty() && !adresse.isEmpty()) {
+                java.util.regex.Matcher m =
+                    java.util.regex.Pattern.compile("\\s+(\\d{5})\\b(.*)$").matcher(adresse);
+                if (m.find()) {
+                    String ville = m.group(2).trim();
+                    cp = m.group(1) + (ville.isEmpty() ? "" : " " + ville);
+                    adresse = adresse.substring(0, m.start()).trim();
+                }
+            }
             o.put("adresse_postale", adresse);
             o.put("code_postal", cp);
 
-            // Email
+            // Email — l'API LBA renvoie des tokens hashés, pas de vrais emails.
+            // On ne conserve que les valeurs contenant un '@' (vraies adresses).
             String email = optString(obj, "contact.email", "email");
+            if (!email.contains("@")) email = "";
             o.put("email_destinataire", email);
-            o.put("titre", "");
+
+            // URL de l'offre — disponible pour peJobs et matchas, pas pour lbaCompanies
+            String url = optString(obj, "url", "nakedUrl", "job.url", "contact.url",
+                                       "company.url", "place.url");
+            if (!url.startsWith("http")) url = "";
+            o.put("url", url);
 
             return o;
         } catch (Exception e) {
@@ -279,11 +307,15 @@ public class ScraperOffres {
             HttpRequest.newBuilder()
                 .uri(URI.create(url))
                 .header("Accept", "application/json")
+                .header("User-Agent", "AlternionApp/1.0")
                 .GET()
                 .build(),
             HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
-        if (response.statusCode() >= 400)
-            throw new IOException("HTTP " + response.statusCode() + " pour " + url);
+        if (response.statusCode() >= 400) {
+            String body = response.body();
+            String detail = (body != null && body.length() <= 300) ? " — " + body : "";
+            throw new IOException("HTTP " + response.statusCode() + " pour " + url + detail);
+        }
         return response.body();
     }
 
@@ -303,18 +335,26 @@ public class ScraperOffres {
 
     private static Set<String> chargerSocietesExistantes() {
         Set<String> set = new HashSet<>();
-        File f = new File(CSV_FILE);
-        if (!f.exists()) return set;
-        try (BufferedReader br = new BufferedReader(
-                new InputStreamReader(new FileInputStream(f), StandardCharsets.UTF_8))) {
-            br.readLine(); // skip header
-            String line;
-            while ((line = br.readLine()) != null) {
-                String[] parts = line.split(",", -1);
-                if (parts.length > 1)
-                    set.add(parts[1].trim().toLowerCase().replace("\"", ""));
-            }
-        } catch (Exception ignored) {}
+        List<File> fichiers = new ArrayList<>();
+        fichiers.add(new File(CSV_FILE));
+        File dir = new File(OFFRES_DIR);
+        if (dir.exists()) {
+            File[] buckets = dir.listFiles((d, n) -> n.endsWith(".csv"));
+            if (buckets != null) for (File b : buckets) fichiers.add(b);
+        }
+        for (File f : fichiers) {
+            if (!f.exists()) continue;
+            try (BufferedReader br = new BufferedReader(
+                    new InputStreamReader(new FileInputStream(f), StandardCharsets.UTF_8))) {
+                br.readLine(); // skip header
+                String line;
+                while ((line = br.readLine()) != null) {
+                    String[] parts = line.split(",", -1);
+                    if (parts.length > 0)
+                        set.add(parts[0].trim().toLowerCase().replace("\"", ""));
+                }
+            } catch (Exception ignored) {}
+        }
         return set;
     }
 
@@ -328,6 +368,38 @@ public class ScraperOffres {
         try (FileInputStream fis = new FileInputStream(f)) { p.load(fis); }
         catch (Exception e) { out.println("[AVERTISSEMENT] Lecture config : " + e.getMessage()); }
         return p;
+    }
+
+    /** Si le fichier de bucket manque la colonne domaine et/ou url, migre le fichier sur place. */
+    static void migrerOffresCSV(String offresFile) {
+        File f = new File(offresFile);
+        if (!f.exists() || f.length() == 0) return;
+        try {
+            List<String> lignes = new ArrayList<>();
+            boolean migrer = false;
+            try (BufferedReader br = new BufferedReader(
+                    new InputStreamReader(new FileInputStream(f), StandardCharsets.UTF_8))) {
+                String header = br.readLine();
+                if (header == null || header.trim().equals(OFFRES_HEADER.trim())) return;
+                migrer = true;
+                boolean hasUrl    = header.contains("url");
+                boolean hasDomain = header.contains("domaine");
+                lignes.add(OFFRES_HEADER);
+                String line;
+                while ((line = br.readLine()) != null) {
+                    if (line.trim().isEmpty()) continue;
+                    if (!hasDomain) line = line + ",";   // ajoute domaine vide
+                    if (!hasUrl)    line = line + ",";   // ajoute url vide
+                    lignes.add(line);
+                }
+            }
+            if (migrer) {
+                try (PrintWriter pw = new PrintWriter(new OutputStreamWriter(
+                        new FileOutputStream(f, false), StandardCharsets.UTF_8))) {
+                    for (String l : lignes) pw.println(l);
+                }
+            }
+        } catch (Exception ignored) {}
     }
 
     private static String echapper(String val) {

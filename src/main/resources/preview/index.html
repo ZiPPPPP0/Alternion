@@ -1,0 +1,757 @@
+<!DOCTYPE html>
+<html lang="fr" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <title>Alternion — Preview</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- ── Header ─────────────────────────────────────────────────── -->
+<header class="hdr">
+  <div class="hdr-brand">
+    <div class="hdr-icon">&#11043;</div>
+    <div>
+      <div class="hdr-logo">Altern<span>ion</span></div>
+      <div class="hdr-sub">Camille Marsac &mdash; Suivi alternance 2026</div>
+    </div>
+  </div>
+  <div class="hdr-stats">
+    <div class="stat-chip"><span>Total</span><span class="val">12</span></div>
+    <div class="stat-chip"><span>G&eacute;n&eacute;r&eacute;s</span><span class="val">12</span></div>
+    <div class="stat-chip"><span>Envoy&eacute;s</span><span class="val">9</span></div>
+    <div class="stat-chip hi"><span>Entretiens</span><span class="val">2</span></div>
+    <div class="stat-chip"><span>Accept&eacute;s</span><span class="val">0</span></div>
+  </div>
+  <button class="theme-btn" id="themeBtn" onclick="toggleTheme()">&#9790; Dark</button>
+</header>
+
+<!-- ── Tabs ───────────────────────────────────────────────────── -->
+<nav class="tabs">
+  <button class="tab on" onclick="switchTab(this,'pActions')">
+    <span class="tab-ico">&#9654;</span>Actions
+  </button>
+  <button class="tab" onclick="switchTab(this,'pTracker')">
+    <span class="tab-ico">&#9776;</span>Tracker
+  </button>
+  <button class="tab" onclick="switchTab(this,'pOffres')">
+    <span class="tab-ico">&#128205;</span>Entreprises
+  </button>
+  <button class="tab" onclick="switchTab(this,'pCsv')">
+    <span class="tab-ico">&#10004;</span>En validation
+  </button>
+</nav>
+
+<!-- ══════════════════════════════════════════════════════════════
+     PANE : ACTIONS
+══════════════════════════════════════════════════════════════════ -->
+<div id="pActions" class="pane on">
+
+  <!-- Rang 1 : actions simples -->
+  <div class="act-top-row">
+
+    <!-- Générer les lettres -->
+    <div class="act-card">
+      <div class="act-card-top">
+        <div class="act-card-ico">&#128196;</div>
+        <div>
+          <div class="act-card-title">G&eacute;n&eacute;rer les lettres</div>
+          <div class="act-card-desc">Lance LettreMailing &mdash; g&eacute;n&egrave;re les LM en PDF et copie le CV dans chaque dossier entreprise depuis <code>entreprises.csv</code>.</div>
+        </div>
+      </div>
+      <div>
+        <button class="btn btn-g btn-sm">&#9654;&ensp;Lancer</button>
+      </div>
+    </div>
+
+    <!-- Envoyer les emails -->
+    <div class="act-card">
+      <div class="act-card-top">
+        <div class="act-card-ico" style="background:rgba(196,150,14,.12);border-color:#4a3808;color:var(--wrn)">&#9993;</div>
+        <div>
+          <div class="act-card-title">Envoyer les emails</div>
+          <div class="act-card-desc">Envoie toutes les candidatures par Gmail avec lettre et CV en pi&egrave;ces jointes &mdash; d&eacute;lai 3s entre chaque envoi.</div>
+        </div>
+      </div>
+      <div>
+        <button class="btn btn-w btn-sm">&#9993;&ensp;Envoyer</button>
+      </div>
+    </div>
+
+  </div><!-- /act-top-row -->
+
+  <!-- Rang 2 : scrapers (collapsibles) -->
+  <div class="act-bottom-row">
+
+    <!-- Scraper offres LBA -->
+    <div class="card">
+      <button class="card-hdr open" onclick="toggleCard(this)">
+        <div class="card-hdr-left">
+          <div class="card-hdr-ico">&#128269;</div>
+          <span>Scraper offres (LBA)</span>
+        </div>
+        <span class="chev">&#9654;</span>
+      </button>
+      <div class="card-body open">
+        <div class="frow fc31">
+          <div>
+            <label class="flbl">Ville</label>
+            <select class="fsel">
+              <option>Caen</option>
+              <option>Rouen</option>
+              <option>&Eacute;vreux</option>
+              <option>Argentan</option>
+              <option>Granville</option>
+              <option>Autre&hellip;</option>
+            </select>
+          </div>
+          <div>
+            <label class="flbl">Rayon (km)</label>
+            <input class="finp" value="60">
+          </div>
+        </div>
+
+        <div>
+          <label class="flbl">Domaines ROME</label>
+          <div class="ms" id="msRome">
+            <button class="ms-btn" onclick="toggleMs('msRome')" type="button">
+              <span class="ms-lbl" id="msRomeLbl">S&eacute;lectionner&hellip;</span>
+              <span class="ms-arr">&#9660;</span>
+            </button>
+            <div class="ms-panel" id="msRomePanel">
+              <div class="ms-grp">
+                <div class="ms-glbl">Informatique</div>
+                <div class="mi"><input type="checkbox" id="rM1805"><label for="rM1805">M1805 &mdash; D&eacute;veloppement informatique</label></div>
+                <div class="mi"><input type="checkbox" id="rM1810"><label for="rM1810">M1810 &mdash; Production &amp; exploitation SI</label></div>
+                <div class="mi"><input type="checkbox" id="rM1802"><label for="rM1802">M1802 &mdash; Expertise &amp; support SI</label></div>
+                <div class="mi"><input type="checkbox" id="rM1806"><label for="rM1806">M1806 &mdash; Conseil &amp; MOA SI</label></div>
+                <div class="mi"><input type="checkbox" id="rM1801"><label for="rM1801">M1801 &mdash; Administration SI</label></div>
+                <div class="mi"><input type="checkbox" id="rM1803"><label for="rM1803">M1803 &mdash; Direction des SI</label></div>
+                <div class="mi"><input type="checkbox" id="rM1804"><label for="rM1804">M1804 &mdash; D&eacute;veloppement jeux vid&eacute;o</label></div>
+              </div>
+              <div class="ms-grp">
+                <div class="ms-glbl">Restauration &amp; H&ocirc;tellerie</div>
+                <div class="mi"><input type="checkbox" id="rH2101"><label for="rH2101">H2101 &mdash; Service en restauration</label></div>
+                <div class="mi"><input type="checkbox" id="rH2102"><label for="rH2102">H2102 &mdash; Management restauration</label></div>
+                <div class="mi"><input type="checkbox" id="rH2301"><label for="rH2301">H2301 &mdash; Cuisine (commis, cuisinier)</label></div>
+                <div class="mi"><input type="checkbox" id="rG1703"><label for="rG1703">G1703 &mdash; R&eacute;ception h&ocirc;teli&egrave;re</label></div>
+                <div class="mi"><input type="checkbox" id="rG1801"><label for="rG1801">G1801 &mdash; Portier, voiturier</label></div>
+              </div>
+              <div class="ms-grp">
+                <div class="ms-glbl">Commerce &amp; Grande distribution</div>
+                <div class="mi"><input type="checkbox" id="rD1505"><label for="rD1505">D1505 &mdash; H&ocirc;tesse / personnel de caisse</label></div>
+                <div class="mi"><input type="checkbox" id="rD1507"><label for="rD1507">D1507 &mdash; Mise en rayon libre-service</label></div>
+                <div class="mi"><input type="checkbox" id="rD1211"><label for="rD1211">D1211 &mdash; Vente en alimentation</label></div>
+                <div class="mi"><input type="checkbox" id="rD1212"><label for="rD1212">D1212 &mdash; Vente habillement &amp; accessoires</label></div>
+                <div class="mi"><input type="checkbox" id="rD1106"><label for="rD1106">D1106 &mdash; Vente &eacute;quipement maison</label></div>
+              </div>
+              <div class="ms-grp">
+                <div class="ms-glbl">Accueil &amp; Services</div>
+                <div class="mi"><input type="checkbox" id="rM1601"><label for="rM1601">M1601 &mdash; Accueil &amp; renseignements</label></div>
+                <div class="mi"><input type="checkbox" id="rK1304"><label for="rK1304">K1304 &mdash; Services domestiques</label></div>
+                <div class="mi"><input type="checkbox" id="rN1103"><label for="rN1103">N1103 &mdash; Magasinage &amp; stockage</label></div>
+                <div class="mi"><input type="checkbox" id="rN1105"><label for="rN1105">N1105 &mdash; Manutention</label></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <button class="btn btn-g btn-sm">&#128269;&ensp;Rechercher</button>
+      </div>
+    </div>
+
+    <!-- Scraper entreprises APE -->
+    <div class="card">
+      <button class="card-hdr open" onclick="toggleCard(this)">
+        <div class="card-hdr-left">
+          <div class="card-hdr-ico">&#127963;</div>
+          <span>Scraper entreprises (APE)</span>
+        </div>
+        <span class="chev">&#9654;</span>
+      </button>
+      <div class="card-body open">
+        <div class="frow fc2">
+          <div>
+            <label class="flbl">D&eacute;partement</label>
+            <select class="fsel">
+              <option>14 &mdash; Calvados</option>
+              <option>27 &mdash; Eure</option>
+              <option>50 &mdash; Manche</option>
+              <option>61 &mdash; Orne</option>
+              <option>76 &mdash; Seine-Maritime</option>
+              <option>Autre&hellip;</option>
+            </select>
+          </div>
+          <div>
+            <label class="flbl">Max r&eacute;sultats</label>
+            <input class="finp" value="200">
+          </div>
+        </div>
+
+        <div>
+          <label class="flbl">Codes APE</label>
+          <div class="ms" id="msApe">
+            <button class="ms-btn" onclick="toggleMs('msApe')" type="button">
+              <span class="ms-lbl" id="msApeLbl">S&eacute;lectionner&hellip;</span>
+              <span class="ms-arr">&#9660;</span>
+            </button>
+            <div class="ms-panel" id="msApePanel">
+              <div class="ms-grp">
+                <div class="ms-glbl">Informatique &amp; Num&eacute;rique</div>
+                <div class="mi"><input type="checkbox" id="a6201Z"><label for="a6201Z">62.01Z &mdash; Programmation informatique</label></div>
+                <div class="mi"><input type="checkbox" id="a6202A"><label for="a6202A">62.02A &mdash; Conseil syst&egrave;mes &amp; logiciels</label></div>
+                <div class="mi"><input type="checkbox" id="a6202B"><label for="a6202B">62.02B &mdash; Tierce maintenance SI</label></div>
+                <div class="mi"><input type="checkbox" id="a6203Z"><label for="a6203Z">62.03Z &mdash; Gestion installations info.</label></div>
+                <div class="mi"><input type="checkbox" id="a6209Z"><label for="a6209Z">62.09Z &mdash; Autres activit&eacute;s info.</label></div>
+                <div class="mi"><input type="checkbox" id="a6311Z"><label for="a6311Z">63.11Z &mdash; H&eacute;bergement &amp; donn&eacute;es</label></div>
+                <div class="mi"><input type="checkbox" id="a5829C"><label for="a5829C">58.29C &mdash; &Eacute;dition logiciels applicatifs</label></div>
+                <div class="mi"><input type="checkbox" id="a7112B"><label for="a7112B">71.12B &mdash; Ing&eacute;nierie &amp; bureau d&rsquo;&eacute;tudes</label></div>
+              </div>
+              <div class="ms-grp">
+                <div class="ms-glbl">Restauration &amp; H&ocirc;tellerie</div>
+                <div class="mi"><input type="checkbox" id="a5610A"><label for="a5610A">56.10A &mdash; Restauration traditionnelle</label></div>
+                <div class="mi"><input type="checkbox" id="a5610B"><label for="a5610B">56.10B &mdash; Caf&eacute;t&eacute;rias &amp; libres-services</label></div>
+                <div class="mi"><input type="checkbox" id="a5621Z"><label for="a5621Z">56.21Z &mdash; Traiteurs &amp; r&eacute;ceptions</label></div>
+                <div class="mi"><input type="checkbox" id="a5629A"><label for="a5629A">56.29A &mdash; Restauration collective</label></div>
+                <div class="mi"><input type="checkbox" id="a5630Z"><label for="a5630Z">56.30Z &mdash; D&eacute;bits de boissons</label></div>
+                <div class="mi"><input type="checkbox" id="a5510Z"><label for="a5510Z">55.10Z &mdash; H&ocirc;tels &amp; h&eacute;bergement</label></div>
+              </div>
+              <div class="ms-grp">
+                <div class="ms-glbl">Commerce &amp; Grande distribution</div>
+                <div class="mi"><input type="checkbox" id="a4711B"><label for="a4711B">47.11B &mdash; Supermarch&eacute;s</label></div>
+                <div class="mi"><input type="checkbox" id="a4711F"><label for="a4711F">47.11F &mdash; Hypermarch&eacute;s</label></div>
+                <div class="mi"><input type="checkbox" id="a4729Z"><label for="a4729Z">47.29Z &mdash; Autres commerces alimentaires</label></div>
+                <div class="mi"><input type="checkbox" id="a4771Z"><label for="a4771Z">47.71Z &mdash; Commerce habillement</label></div>
+                <div class="mi"><input type="checkbox" id="a4772Z"><label for="a4772Z">47.72Z &mdash; Commerce chaussures</label></div>
+              </div>
+              <div class="ms-grp">
+                <div class="ms-glbl">Services aux personnes</div>
+                <div class="mi"><input type="checkbox" id="a8121Z"><label for="a8121Z">81.21Z &mdash; Nettoyage courant b&acirc;timents</label></div>
+                <div class="mi"><input type="checkbox" id="a9601A"><label for="a9601A">96.01A &mdash; Blanchisseries &amp; laveries</label></div>
+                <div class="mi"><input type="checkbox" id="a8810A"><label for="a8810A">88.10A &mdash; Aide &agrave; domicile</label></div>
+                <div class="mi"><input type="checkbox" id="a8010Z"><label for="a8010Z">80.10Z &mdash; S&eacute;curit&eacute; priv&eacute;e</label></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <button class="btn btn-g btn-sm">&#127963;&ensp;Rechercher</button>
+      </div>
+    </div>
+
+  </div><!-- /act-bottom-row -->
+
+  <!-- Console -->
+  <div class="con-wrap">
+    <div class="con-hdr">
+      <span class="con-lbl">
+        <span class="con-dot"></span>
+        Sortie console
+      </span>
+      <button class="btn btn-o btn-xs">Effacer</button>
+    </div>
+    <div class="con-box"><span class="con-line-dim">[10:42:03]</span> <span class="con-line-ok">Pr&ecirc;t &mdash; en attente d&rsquo;une action.</span>
+<span class="con-line-dim">[10:42:18]</span> <span class="con-line-ok">Scraper APE lanc&eacute; sur d&eacute;p. 14 (codes : 62.01Z, 62.02A)</span>
+<span class="con-line-dim">[10:42:19]</span> Requ&ecirc;te INSEE page 1/5... 200 r&eacute;sultats
+<span class="con-line-dim">[10:42:21]</span> Requ&ecirc;te INSEE page 2/5... 200 r&eacute;sultats
+<span class="con-line-dim">[10:42:22]</span> Requ&ecirc;te INSEE page 3/5... 147 r&eacute;sultats
+<span class="con-line-dim">[10:42:22]</span> Post-filtrage d&eacute;p. 14: 412 entreprises retenues sur 547
+<span class="con-line-ok">[10:42:22]</span> <span class="con-line-ok">&#10003; Termin&eacute; &mdash; 412 entreprises sauvegard&eacute;es dans bucket "normandie"</span></div>
+  </div>
+
+</div><!-- /pActions -->
+
+<!-- ══════════════════════════════════════════════════════════════
+     PANE : TRACKER
+══════════════════════════════════════════════════════════════════ -->
+<div id="pTracker" class="pane">
+
+  <div class="tbl-wrap">
+    <table class="tbl">
+      <thead>
+        <tr>
+          <th style="width:28%">Soci&eacute;t&eacute;</th>
+          <th style="width:24%">Email</th>
+          <th style="width:11%">G&eacute;n&eacute;r&eacute;</th>
+          <th style="width:11%">Envoy&eacute;</th>
+          <th style="width:12%">Statut</th>
+          <th class="tal">Notes</th>
+          <th style="width:60px"></th>
+        </tr>
+      </thead>
+      <tbody>
+
+        <!-- Row 1 : entretien -->
+        <tr class="erow xp" onclick="toggleRow(this)">
+          <td><span class="expand-ico">&#9654;</span>Sopra Steria Normandie</td>
+          <td>alternance@sopra.fr</td>
+          <td>15/02/2026</td>
+          <td>16/02/2026</td>
+          <td><span class="bdg bdg-entret">Entretien</span></td>
+          <td>RDV 05/03 14h</td>
+          <td class="row-acts">
+            <button class="btn btn-o btn-xs">&#9998;</button>
+          </td>
+        </tr>
+        <tr class="drow" id="det-1">
+          <td colspan="7">
+            <div class="det-box">
+              <div class="dl"><span class="dk">Adresse</span><span class="dv">Normandie Park, 14000 Caen</span></div>
+              <div class="dl"><span class="dk">Email</span><span class="dv">alternance@sopra.fr</span></div>
+              <div class="dl"><span class="dk">Notes compl&egrave;tes</span><span class="dv">RDV t&eacute;l&eacute;phonique le 05/03 &agrave; 14h avec M. Laurent</span></div>
+              <div class="dl"><span class="dk">Statut</span><span class="dv"><select class="stat-sel"><option>entretien</option><option>envoy&eacute;</option><option>g&eacute;n&eacute;r&eacute;</option><option>accept&eacute;</option><option>refus&eacute;</option></select></span></div>
+            </div>
+          </td>
+        </tr>
+
+        <!-- Row 2 : entretien -->
+        <tr class="erow" onclick="toggleRow(this)">
+          <td><span class="expand-ico">&#9654;</span>TechSolutions SAS</td>
+          <td>rh@techsolutions-caen.fr</td>
+          <td>18/02/2026</td>
+          <td>19/02/2026</td>
+          <td><span class="bdg bdg-entret">Entretien</span></td>
+          <td>Email de relance ok</td>
+          <td class="row-acts">
+            <button class="btn btn-o btn-xs">&#9998;</button>
+          </td>
+        </tr>
+        <tr class="drow" style="display:none" id="det-2">
+          <td colspan="7">
+            <div class="det-box">
+              <div class="dl"><span class="dk">Adresse</span><span class="dv">14 Rue Alfred Kastler, 14000 Caen</span></div>
+              <div class="dl"><span class="dk">Email</span><span class="dv">rh@techsolutions-caen.fr</span></div>
+              <div class="dl"><span class="dk">Site</span><span class="dv"><a href="#" class="site-link">techsolutions-caen.fr</a></span></div>
+              <div class="dl"><span class="dk">Statut</span><span class="dv"><select class="stat-sel"><option>entretien</option><option>envoy&eacute;</option></select></span></div>
+            </div>
+          </td>
+        </tr>
+
+        <!-- Row 3 : envoyé -->
+        <tr class="erow" onclick="toggleRow(this)">
+          <td><span class="expand-ico">&#9654;</span>H&ocirc;tel Normandy</td>
+          <td>rh@hotelnormandy.fr</td>
+          <td>20/02/2026</td>
+          <td>21/02/2026</td>
+          <td><span class="bdg bdg-envoye">Envoy&eacute;</span></td>
+          <td>&mdash;</td>
+          <td class="row-acts">
+            <button class="btn btn-o btn-xs">&#9998;</button>
+          </td>
+        </tr>
+        <tr class="drow" style="display:none">
+          <td colspan="7">
+            <div class="det-box">
+              <div class="dl"><span class="dk">Adresse</span><span class="dv">19 Rue Jeanne d'Arc, 14000 Caen</span></div>
+              <div class="dl"><span class="dk">Email</span><span class="dv">rh@hotelnormandy.fr</span></div>
+              <div class="dl"><span class="dk">Statut</span><span class="dv"><select class="stat-sel"><option>envoy&eacute;</option><option>entretien</option></select></span></div>
+            </div>
+          </td>
+        </tr>
+
+        <!-- Row 4 : envoyé -->
+        <tr class="erow" onclick="toggleRow(this)">
+          <td><span class="expand-ico">&#9654;</span>Restaurant Le Normand</td>
+          <td>contact@lenormand.fr</td>
+          <td>22/02/2026</td>
+          <td>23/02/2026</td>
+          <td><span class="bdg bdg-envoye">Envoy&eacute;</span></td>
+          <td>&mdash;</td>
+          <td class="row-acts">
+            <button class="btn btn-o btn-xs">&#9998;</button>
+          </td>
+        </tr>
+        <tr class="drow" style="display:none">
+          <td colspan="7">
+            <div class="det-box">
+              <div class="dl"><span class="dk">Adresse</span><span class="dv">8 Place de la R&eacute;publique, 14000 Caen</span></div>
+              <div class="dl"><span class="dk">Email</span><span class="dv">contact@lenormand.fr</span></div>
+              <div class="dl"><span class="dk">Statut</span><span class="dv"><select class="stat-sel"><option>envoy&eacute;</option><option>entretien</option></select></span></div>
+            </div>
+          </td>
+        </tr>
+
+        <!-- Row 5 : généré -->
+        <tr class="erow" onclick="toggleRow(this)">
+          <td><span class="expand-ico">&#9654;</span>Carrefour Market H&eacute;rouville</td>
+          <td>&mdash;</td>
+          <td>24/02/2026</td>
+          <td>&mdash;</td>
+          <td><span class="bdg bdg-gen">G&eacute;n&eacute;r&eacute;</span></td>
+          <td>&mdash;</td>
+          <td class="row-acts">
+            <button class="btn btn-o btn-xs">&#9998;</button>
+          </td>
+        </tr>
+        <tr class="drow" style="display:none">
+          <td colspan="7">
+            <div class="det-box">
+              <div class="dl"><span class="dk">Adresse</span><span class="dv">Av. de la C&ocirc;te de Nacre, 14200 H&eacute;rouville-Saint-Clair</span></div>
+              <div class="dl"><span class="dk">Email</span><span class="dv">non renseign&eacute;</span></div>
+              <div class="dl"><span class="dk">Statut</span><span class="dv"><select class="stat-sel"><option>g&eacute;n&eacute;r&eacute;</option><option>envoy&eacute;</option></select></span></div>
+            </div>
+          </td>
+        </tr>
+
+      </tbody>
+    </table>
+  </div>
+
+</div><!-- /pTracker -->
+
+<!-- ══════════════════════════════════════════════════════════════
+     PANE : ENTREPRISES (buckets)
+══════════════════════════════════════════════════════════════════ -->
+<div id="pOffres" class="pane">
+
+  <div class="bkt-bar">
+    <button class="bkt-pill on">Tout <span class="cnt">47</span></button>
+    <button class="bkt-pill">avec-offre <span class="cnt">18</span></button>
+    <button class="bkt-pill">sans-offre <span class="cnt">21</span></button>
+    <button class="bkt-pill">normandie <span class="cnt">8</span></button>
+    <div class="bkt-acts">
+      <button class="btn btn-o btn-xs">Vider</button>
+      <button class="btn btn-d btn-xs">Supprimer</button>
+    </div>
+  </div>
+
+  <p class="pane-note">
+    Cliquez sur une ligne pour afficher les d&eacute;tails. Cliquez sur <strong>Valider &rarr;</strong> pour transf&eacute;rer dans <em>En validation</em>.
+  </p>
+
+  <div class="tbl-wrap">
+    <table class="tbl">
+      <thead>
+        <tr>
+          <th style="width:35%" class="tal">Soci&eacute;t&eacute;</th>
+          <th style="width:20%" class="tal">CP / Ville</th>
+          <th style="width:22%" class="tal">Domaine</th>
+          <th style="width:10%" class="tal">Source</th>
+          <th style="width:13%"></th>
+        </tr>
+      </thead>
+      <tbody>
+
+        <!-- Row 1 expanded -->
+        <tr class="erow xp" onclick="toggleRow(this)">
+          <td class="tal"><span class="expand-ico">&#9654;</span>TechSolutions SAS</td>
+          <td class="tal">14000 Caen</td>
+          <td class="tal">Programmation informatique</td>
+          <td class="tal"><span class="bdg bdg-offre">Offre</span></td>
+          <td><div class="row-acts"><button class="btn btn-g btn-xs">Valider &rarr;</button></div></td>
+        </tr>
+        <tr class="drow" id="det-ent-1">
+          <td colspan="5">
+            <div class="det-box">
+              <div class="dl"><span class="dk">Nom complet</span><span class="dv">TechSolutions SAS</span></div>
+              <div class="dl"><span class="dk">Adresse</span><span class="dv">14 Rue Alfred Kastler, 14000 Caen</span></div>
+              <div class="dl"><span class="dk">SIRET</span><span class="dv">82341905700018</span></div>
+              <div class="dl"><span class="dk">APE</span><span class="dv">62.01Z &mdash; Programmation informatique</span></div>
+              <div class="dl"><span class="dk">Site web</span><span class="dv"><a href="#" class="site-link">techsolutions-caen.fr</a></span></div>
+              <div class="dl"><span class="dk">Email</span><span class="dv">contact@techsolutions-caen.fr</span></div>
+            </div>
+          </td>
+        </tr>
+
+        <!-- Row 2 -->
+        <tr class="erow" onclick="toggleRow(this)">
+          <td class="tal"><span class="expand-ico">&#9654;</span>H&ocirc;tel Normandy &amp; Spa</td>
+          <td class="tal">14000 Caen</td>
+          <td class="tal">H&ocirc;tels &amp; h&eacute;bergement</td>
+          <td class="tal"><span class="bdg bdg-offre">Offre</span></td>
+          <td><div class="row-acts"><button class="btn btn-g btn-xs">Valider &rarr;</button></div></td>
+        </tr>
+        <tr class="drow" style="display:none">
+          <td colspan="5">
+            <div class="det-box">
+              <div class="dl"><span class="dk">Adresse</span><span class="dv">19 Rue Jeanne d'Arc, 14000 Caen</span></div>
+              <div class="dl"><span class="dk">APE</span><span class="dv">55.10Z &mdash; H&ocirc;tels &amp; h&eacute;bergement</span></div>
+              <div class="dl"><span class="dk">Site web</span><span class="dv"><a href="#" class="site-link">hotelnormandy.fr</a></span></div>
+              <div class="dl"><span class="dk">Email</span><span class="dv">rh@hotelnormandy.fr</span></div>
+            </div>
+          </td>
+        </tr>
+
+        <!-- Row 3 -->
+        <tr class="erow" onclick="toggleRow(this)">
+          <td class="tal"><span class="expand-ico">&#9654;</span>Restaurant Le Normand</td>
+          <td class="tal">14000 Caen</td>
+          <td class="tal">Restauration traditionnelle</td>
+          <td class="tal"><span class="bdg bdg-nooffre">Sans offre</span></td>
+          <td><div class="row-acts"><button class="btn btn-g btn-xs">Valider &rarr;</button></div></td>
+        </tr>
+        <tr class="drow" style="display:none">
+          <td colspan="5">
+            <div class="det-box">
+              <div class="dl"><span class="dk">Adresse</span><span class="dv">8 Place de la R&eacute;publique, 14000 Caen</span></div>
+              <div class="dl"><span class="dk">APE</span><span class="dv">56.10A &mdash; Restauration traditionnelle</span></div>
+              <div class="dl"><span class="dk">Email</span><span class="dv">contact@lenormand.fr</span></div>
+            </div>
+          </td>
+        </tr>
+
+        <!-- Row 4 -->
+        <tr class="erow" onclick="toggleRow(this)">
+          <td class="tal"><span class="expand-ico">&#9654;</span>Leclerc H&eacute;rouville</td>
+          <td class="tal">14200 H&eacute;rouville-Saint-Clair</td>
+          <td class="tal">Hypermarch&eacute;s</td>
+          <td class="tal"><span class="bdg bdg-nooffre">Sans offre</span></td>
+          <td><div class="row-acts"><button class="btn btn-g btn-xs">Valider &rarr;</button></div></td>
+        </tr>
+        <tr class="drow" style="display:none">
+          <td colspan="5">
+            <div class="det-box">
+              <div class="dl"><span class="dk">Adresse</span><span class="dv">Av. de la C&ocirc;te de Nacre, 14200 H&eacute;rouville-Saint-Clair</span></div>
+              <div class="dl"><span class="dk">APE</span><span class="dv">47.11F &mdash; Hypermarch&eacute;s</span></div>
+              <div class="dl"><span class="dk">SIRET</span><span class="dv">32234050100062</span></div>
+            </div>
+          </td>
+        </tr>
+
+        <!-- Row 5 -->
+        <tr class="erow" onclick="toggleRow(this)">
+          <td class="tal"><span class="expand-ico">&#9654;</span>Carrefour Market Bayeux</td>
+          <td class="tal">14400 Bayeux</td>
+          <td class="tal">Supermarch&eacute;s</td>
+          <td class="tal"><span class="bdg bdg-nooffre">Sans offre</span></td>
+          <td><div class="row-acts"><button class="btn btn-g btn-xs">Valider &rarr;</button></div></td>
+        </tr>
+        <tr class="drow" style="display:none">
+          <td colspan="5">
+            <div class="det-box">
+              <div class="dl"><span class="dk">Adresse</span><span class="dv">3 Rue de la Poterie, 14400 Bayeux</span></div>
+              <div class="dl"><span class="dk">APE</span><span class="dv">47.11B &mdash; Supermarch&eacute;s</span></div>
+            </div>
+          </td>
+        </tr>
+
+        <!-- Row 6 -->
+        <tr class="erow" onclick="toggleRow(this)">
+          <td class="tal"><span class="expand-ico">&#9654;</span>Digital Normandie</td>
+          <td class="tal">14000 Caen</td>
+          <td class="tal">Conseil syst&egrave;mes &amp; logiciels</td>
+          <td class="tal"><span class="bdg bdg-offre">Offre</span></td>
+          <td><div class="row-acts"><button class="btn btn-g btn-xs">Valider &rarr;</button></div></td>
+        </tr>
+        <tr class="drow" style="display:none">
+          <td colspan="5">
+            <div class="det-box">
+              <div class="dl"><span class="dk">Adresse</span><span class="dv">Technopole Caen Normandie, 14000 Caen</span></div>
+              <div class="dl"><span class="dk">APE</span><span class="dv">62.02A &mdash; Conseil syst&egrave;mes &amp; logiciels</span></div>
+              <div class="dl"><span class="dk">Site web</span><span class="dv"><a href="#" class="site-link">digital-normandie.fr</a></span></div>
+              <div class="dl"><span class="dk">Email</span><span class="dv">jobs@digital-normandie.fr</span></div>
+            </div>
+          </td>
+        </tr>
+
+      </tbody>
+    </table>
+  </div>
+
+</div><!-- /pOffres -->
+
+<!-- ══════════════════════════════════════════════════════════════
+     PANE : EN VALIDATION
+══════════════════════════════════════════════════════════════════ -->
+<div id="pCsv" class="pane">
+
+  <div class="tbl-header">
+    <span class="tbl-title">Contenu de <code>data/entreprises.csv</code></span>
+    <div class="tbl-actions">
+      <button class="btn btn-g btn-sm">+ Ajouter</button>
+    </div>
+  </div>
+
+  <div class="tbl-wrap">
+    <table class="tbl">
+      <thead>
+        <tr>
+          <th style="width:28%" class="tal">Soci&eacute;t&eacute;</th>
+          <th style="width:32%" class="tal">Adresse</th>
+          <th style="width:26%" class="tal">Email</th>
+          <th style="width:14%"></th>
+        </tr>
+      </thead>
+      <tbody>
+
+        <tr>
+          <td class="tal">Sopra Steria Normandie</td>
+          <td class="tal">Normandie Park, 14000 Caen</td>
+          <td class="tal">alternance@sopra.fr</td>
+          <td><div class="row-acts">
+            <button class="btn btn-o btn-xs">&#9998;</button>
+            <button class="btn btn-d btn-xs">&#10005;</button>
+          </div></td>
+        </tr>
+
+        <tr>
+          <td class="tal">TechSolutions SAS</td>
+          <td class="tal">14 Rue Alfred Kastler, 14000 Caen</td>
+          <td class="tal">rh@techsolutions-caen.fr</td>
+          <td><div class="row-acts">
+            <button class="btn btn-o btn-xs">&#9998;</button>
+            <button class="btn btn-d btn-xs">&#10005;</button>
+          </div></td>
+        </tr>
+
+        <tr>
+          <td class="tal">H&ocirc;tel Normandy &amp; Spa</td>
+          <td class="tal">19 Rue Jeanne d'Arc, 14000 Caen</td>
+          <td class="tal">rh@hotelnormandy.fr</td>
+          <td><div class="row-acts">
+            <button class="btn btn-o btn-xs">&#9998;</button>
+            <button class="btn btn-d btn-xs">&#10005;</button>
+          </div></td>
+        </tr>
+
+        <tr>
+          <td class="tal">Digital Normandie</td>
+          <td class="tal">Technopole Caen Normandie, 14000 Caen</td>
+          <td class="tal">jobs@digital-normandie.fr</td>
+          <td><div class="row-acts">
+            <button class="btn btn-o btn-xs">&#9998;</button>
+            <button class="btn btn-d btn-xs">&#10005;</button>
+          </div></td>
+        </tr>
+
+        <tr>
+          <td class="tal">Restaurant Le Normand</td>
+          <td class="tal">8 Place de la R&eacute;publique, 14000 Caen</td>
+          <td class="tal">contact@lenormand.fr</td>
+          <td><div class="row-acts">
+            <button class="btn btn-o btn-xs">&#9998;</button>
+            <button class="btn btn-d btn-xs">&#10005;</button>
+          </div></td>
+        </tr>
+
+        <tr>
+          <td class="tal">Ingeniance Normandie</td>
+          <td class="tal">Rue Claude Bloch, 14000 Caen</td>
+          <td class="tal">recrutement@ingeniance.fr</td>
+          <td><div class="row-acts">
+            <button class="btn btn-o btn-xs">&#9998;</button>
+            <button class="btn btn-d btn-xs">&#10005;</button>
+          </div></td>
+        </tr>
+
+      </tbody>
+    </table>
+  </div>
+
+</div><!-- /pCsv -->
+
+
+<!-- ── Modal bucket ────────────────────────────────────────────── -->
+<div id="ovBucket" class="ov">
+  <div class="mbox">
+    <div class="mtit">R&eacute;pertoire de destination</div>
+    <div class="mfld">
+      <label class="flbl">R&eacute;pertoire</label>
+      <select class="fsel">
+        <option>avec-offre</option>
+        <option>sans-offre</option>
+        <option>normandie</option>
+        <option>&#43; Cr&eacute;er un r&eacute;pertoire&hellip;</option>
+      </select>
+    </div>
+    <div class="mfoo">
+      <button class="btn btn-o btn-sm" onclick="document.getElementById('ovBucket').classList.remove('on')">Annuler</button>
+      <button class="btn btn-g btn-sm">Lancer</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Modal ajout entreprise ─────────────────────────────────── -->
+<div id="ovEntreprise" class="ov">
+  <div class="mbox">
+    <div class="mtit">Ajouter une entreprise</div>
+    <div class="mfld">
+      <label class="flbl">Soci&eacute;t&eacute; <span style="color:var(--dng)">*</span></label>
+      <input class="finp" placeholder="Nom de l&rsquo;entreprise">
+    </div>
+    <div class="mfld">
+      <label class="flbl">Adresse postale</label>
+      <input class="finp" placeholder="14 rue Alfred Kastler">
+    </div>
+    <div class="mfld">
+      <label class="flbl">Code postal + Ville</label>
+      <input class="finp" placeholder="14000 Caen">
+    </div>
+    <div class="mfld">
+      <label class="flbl">Email destinataire</label>
+      <input class="finp" placeholder="contact@entreprise.fr">
+    </div>
+    <div class="mfoo">
+      <button class="btn btn-o btn-sm" onclick="document.getElementById('ovEntreprise').classList.remove('on')">Annuler</button>
+      <button class="btn btn-g btn-sm">Sauvegarder</button>
+    </div>
+  </div>
+</div>
+
+
+<script>
+/* ── Tabs ─────────────────────────────────────────────────────── */
+function switchTab(btn, id) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('on'));
+  document.querySelectorAll('.pane').forEach(p => p.classList.remove('on'));
+  btn.classList.add('on');
+  document.getElementById(id).classList.add('on');
+}
+
+/* ── Thème ────────────────────────────────────────────────────── */
+function toggleTheme() {
+  var isLight = document.documentElement.getAttribute('data-theme') !== 'light';
+  document.documentElement.setAttribute('data-theme', isLight ? 'light' : 'dark');
+  document.getElementById('themeBtn').textContent = isLight ? '☀ Light' : '☾ Dark';
+}
+
+/* ── Cards collapsibles ───────────────────────────────────────── */
+function toggleCard(hdr) {
+  hdr.classList.toggle('open');
+  hdr.nextElementSibling.classList.toggle('open');
+}
+
+/* ── Multi-select ─────────────────────────────────────────────── */
+function toggleMs(id) {
+  var btn   = document.querySelector('#' + id + ' .ms-btn');
+  var panel = document.querySelector('#' + id + ' .ms-panel');
+  var wasOpen = panel.classList.contains('open');
+  document.querySelectorAll('.ms-panel').forEach(p => p.classList.remove('open'));
+  document.querySelectorAll('.ms-btn').forEach(b => b.classList.remove('open'));
+  if (!wasOpen) { panel.classList.add('open'); btn.classList.add('open'); }
+}
+document.addEventListener('click', function(e) {
+  if (!e.target.closest('.ms')) {
+    document.querySelectorAll('.ms-panel').forEach(p => p.classList.remove('open'));
+    document.querySelectorAll('.ms-btn').forEach(b => b.classList.remove('open'));
+  }
+});
+
+/* ── Expand rows ──────────────────────────────────────────────── */
+var rowIdx = 0;
+function toggleRow(erow) {
+  var next = erow.nextElementSibling;
+  if (!next || !next.classList.contains('drow')) return;
+  var open = erow.classList.toggle('xp');
+  next.style.display = open ? '' : 'none';
+}
+
+/* Init: show first detail rows that are already expanded */
+document.querySelectorAll('.erow.xp').forEach(function(row) {
+  var next = row.nextElementSibling;
+  if (next && next.classList.contains('drow')) {
+    next.style.display = '';
+  }
+});
+
+/* ── Bucket pills ─────────────────────────────────────────────── */
+document.querySelectorAll('.bkt-pill').forEach(function(pill) {
+  pill.addEventListener('click', function() {
+    document.querySelectorAll('.bkt-pill').forEach(p => p.classList.remove('on'));
+    pill.classList.add('on');
+  });
+});
+</script>
+</body>
+</html>
