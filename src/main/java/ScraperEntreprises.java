@@ -310,7 +310,7 @@ public class ScraperEntreprises {
     private static Set<String> chargerSocietesExistantes() {
         Set<String> set = new HashSet<>();
         List<File> fichiers = new ArrayList<>();
-        fichiers.add(new File("data/entreprises.csv"));
+        fichiers.add(new File("data/enValidation.csv"));
         File dir = new File(ScraperOffres.OFFRES_DIR);
         if (dir.exists()) {
             File[] buckets = dir.listFiles((d, n) -> n.endsWith(".csv"));

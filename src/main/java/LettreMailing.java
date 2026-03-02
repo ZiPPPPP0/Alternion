@@ -12,7 +12,7 @@ public class LettreMailing {
 
     private static final String DOSSIER_BASE = "outputs";
     private static final String NOM_FICHIER  = "LM_Camille_Marsac";
-    private static final String CSV_FILE     = "data/entreprises.csv";
+    private static final String CSV_FILE     = "data/enValidation.csv";
     private static final String MODELE_FILE  = "templates/lettre_modele.docx";
     private static final String CV_FILE      = "templates/CV_Camille_Marsac.pdf";
 

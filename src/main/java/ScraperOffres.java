@@ -13,7 +13,7 @@ import java.util.*;
  *  - api-adresse.data.gouv.fr  (géocodage ville → lat/lon, sans inscription)
  *  - La Bonne Alternance API   (offres alternance, sans inscription)
  *
- * Les résultats sont ajoutés à data/entreprises.csv (doublons ignorés).
+ * Les résultats sont ajoutés à data/enValidation.csv (doublons ignorés).
  * Relancer LettreMailing ensuite pour générer les LM.
  *
  * Config dans config/config.properties :
@@ -29,7 +29,7 @@ public class ScraperOffres {
 
     private static final String GEO_API     = "https://api-adresse.data.gouv.fr/search/";
     private static final String LBA_API     = "https://labonnealternance.apprentissage.beta.gouv.fr/api/v1/jobsEtFormations";
-    private static final String CSV_FILE    = "data/entreprises.csv";
+    private static final String CSV_FILE    = "data/enValidation.csv";
     static final String OFFRES_DIR          = "data/offres";
     static final String OFFRES_HEADER       = "societe,adresse_postale,code_postal,email_destinataire,domaine,url";
     private static final String CONFIG_FILE = "config/config.properties";
@@ -104,7 +104,7 @@ public class ScraperOffres {
             reponse = "tout";
             out.println("\nMode auto : ajout de toutes les entreprises trouv\u00e9es.");
         } else {
-            out.println("\nEntrez les num\u00e9ros \u00e0 ajouter dans entreprises.csv");
+            out.println("\nEntrez les num\u00e9ros \u00e0 ajouter dans enValidation.csv");
             out.println("(ex: 1,3,5  ou  tout  pour tout prendre) :");
             out.print("> ");
             reponse = scanner.nextLine().trim();

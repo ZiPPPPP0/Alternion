@@ -19,7 +19,7 @@ import java.util.*;
 public class EnvoiCandidatures {
 
     private static final String DOSSIER_BASE = "outputs";
-    private static final String CSV_FILE     = "data/entreprises.csv";
+    private static final String CSV_FILE     = "data/enValidation.csv";
     private static final String CONFIG_FILE  = "config/config.properties";
     private static final String NOM_LM      = "LM_Camille_Marsac.pdf";
     private static final String NOM_CV      = "CV_Camille_Marsac.pdf";

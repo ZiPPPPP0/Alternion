@@ -83,12 +83,11 @@
     .pane.on { display:block; }
 
     /* ── Grille actions ───────────────────────────────── */
-    .act-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:10px; margin-bottom:14px; }
-    @media(max-width:1100px) { .act-grid { grid-template-columns:repeat(2,1fr); } }
-    @media(max-width:580px)  { .act-grid { grid-template-columns:1fr; } }
+    .act-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:10px; margin-bottom:14px; }
+    @media(max-width:700px)  { .act-grid { grid-template-columns:1fr; } }
 
     /* ── Cards collapsibles ───────────────────────────── */
-    .card { background:var(--bg-s); border:1px solid var(--brd); border-radius:7px; overflow:hidden; }
+    .card { background:var(--bg-s); border:1px solid var(--brd); border-radius:7px; }
     .card-hdr { display:flex; align-items:center; justify-content:space-between; padding:9px 13px;
                 cursor:pointer; background:none; border:none; width:100%; color:var(--txt-d);
                 font-size:.72rem; text-transform:uppercase; letter-spacing:.08em; font-weight:600;
@@ -210,6 +209,13 @@
     code { background:var(--bg-i); border:1px solid var(--brd); border-radius:3px;
            padding:1px 5px; font-size:.8em; color:var(--txt-d); }
     .hint { font-size:.72rem; color:var(--txt-d); margin-top:6px; }
+
+    /* ── Scrollbars ───────────────────────────────────────── */
+    ::-webkit-scrollbar { width:7px; height:7px; }
+    ::-webkit-scrollbar-track { background:var(--bg-i); border-radius:4px; }
+    ::-webkit-scrollbar-thumb { background:var(--txt-d); border-radius:4px; }
+    ::-webkit-scrollbar-thumb:hover { background:var(--acc); }
+    * { scrollbar-width:thin; scrollbar-color:var(--txt-d) var(--bg-i); }
   </style>
 </head>
 <body>
@@ -240,6 +246,11 @@
 
 <!-- ── Pane : Actions ───────────────────────────────────── -->
 <div id="pActions" class="pane on">
+  <div class="con-hdr">
+    <span class="con-lbl">Sortie console</span>
+    <button class="btn btn-o btn-xs" onclick="clearConsole()">Effacer</button>
+  </div>
+  <div class="con-box" id="console" style="margin-bottom:14px">Pr&ecirc;t &mdash; cliquez sur une action ci-dessous.</div>
   <div class="act-grid">
 
     <!-- Générer les lettres -->
@@ -432,12 +443,6 @@
     </div>
 
   </div><!-- /act-grid -->
-
-  <div class="con-hdr">
-    <span class="con-lbl">Sortie console</span>
-    <button class="btn btn-o btn-xs" onclick="clearConsole()">Effacer</button>
-  </div>
-  <div class="con-box" id="console">Pr&ecirc;t &mdash; cliquez sur une action ci-dessus.</div>
 </div>
 
 <!-- ── Pane : Tracker ────────────────────────────────────── -->
@@ -495,7 +500,7 @@
 <!-- ── Pane : En validation ──────────────────────────────── -->
 <div id="pCsv" class="pane">
   <div class="tb-hdr">
-    <span class="tb-tit">Contenu de <code>data/entreprises.csv</code></span>
+    <span class="tb-tit">Contenu de <code>data/enValidation.csv</code></span>
     <button class="btn btn-g btn-sm" onclick="ouvrirAjout()">+ Ajouter</button>
   </div>
   <div class="tbl-wrap">
@@ -770,11 +775,13 @@ async function loadOffres() {
           + '<td>' + (hasOffre
               ? '<span class="bdg bdg-offre">offre</span>'
               : '<span class="bdg bdg-ent">entreprise</span>') + '</td>'
-          + '<td><div class="ra">'
+          + '<td onclick="event.stopPropagation()"><div class="ra">'
           + (deja
               ? '<span class="bdg bdg-done">\u2713 Ajout\u00e9e</span>'
-              : '<button class="btn btn-g btn-xs" onclick="event.stopPropagation();ajouterOffre(this,'
-                + JSON.stringify(row).replace(/'/g, "&#39;") + ')">\u2192 Valider</button>')
+              : '<button class="btn btn-g btn-xs" onclick="ajouterOffre(this,'
+                + JSON.stringify(row).replace(/"/g, '&quot;').replace(/'/g, "&#39;") + ')">\u2192 Valider</button>')
+          + '<button class="btn btn-d btn-xs" title="Supprimer" onclick="supprimerOffre(this,'
+            + JSON.stringify(row).replace(/"/g, '&quot;').replace(/'/g, "&#39;") + ')">\u2715</button>'
           + '</div></td>'
           + '</tr>';
 
@@ -787,11 +794,18 @@ async function loadOffres() {
           '<a href="' + esc(row.url) + '" target="_blank" onclick="event.stopPropagation()">'
           + esc(row.url) + '</a>']);
 
+        var ville = (row.ville || (row.code_postal || '').replace(/^\d{4,5}\s*/, '')).trim();
+        var gQuery = encodeURIComponent((row.societe || '') + (ville ? ' ' + ville : ''));
+        var gBtn = '<div class="dl" style="margin-top:6px;padding-top:6px;border-top:1px solid var(--brd)">'
+          + '<span class="dk">Recherche</span>'
+          + '<span class="dv"><a href="https://www.google.com/search?q=' + gQuery + '" target="_blank" onclick="event.stopPropagation()" class="btn btn-o btn-xs" style="text-decoration:none">🔍 ' + esc(row.societe || '') + '</a></span></div>';
+
         var detRow = '<tr id="' + detId + '" class="drow" style="display:none">'
           + '<td colspan="5"><div class="det-box">'
           + (details.length
               ? details.map(d => '<div class="dl"><span class="dk">' + d[0] + '</span><span class="dv">' + d[1] + '</span></div>').join('')
               : '<span style="color:var(--txt-m);font-size:.78rem">Aucun d\u00e9tail disponible.</span>')
+          + gBtn
           + '</div></td></tr>';
 
         return mainRow + detRow;
@@ -822,7 +836,23 @@ async function ajouterOffre(btn, row) {
   }
 }
 
-/* ── En validation (entreprises.csv) ─────────────────────── */
+async function supprimerOffre(btn, row) {
+  if (!confirm('Supprimer\u00a0«\u00a0' + (row.societe || '') + '\u00a0» du bucket\u00a0?')) return;
+  btn.disabled = true;
+  var res = await fetch('/api/del-offre', { method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify(row) }).then(r => r.json()).catch(() => ({ error: 'r\u00e9seau' }));
+  if (res.ok) {
+    var tr = btn.closest('tr');
+    var next = tr && tr.nextElementSibling;
+    if (next && next.classList.contains('drow')) next.remove();
+    if (tr) tr.remove();
+  } else {
+    btn.disabled = false;
+    alert('Erreur\u00a0: ' + (res.error || 'inconnue'));
+  }
+}
+
+/* ── En validation (enValidation.csv) ────────────────────── */
 async function loadCsv() {
   const rows = await fetch('/api/csv').then(r => r.json()).catch(() => []);
   document.getElementById('csvBody').innerHTML = rows.length

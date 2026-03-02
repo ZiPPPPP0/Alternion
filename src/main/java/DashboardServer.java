@@ -18,7 +18,7 @@ import java.util.concurrent.*;
 public class DashboardServer {
 
     private static final int PORT = 8080;
-    static final String CSV_ENTREPRISES  = "data/entreprises.csv";
+    static final String CSV_ENTREPRISES  = "data/enValidation.csv";
     static final String OFFRES_DIR       = "data/offres";
     static final String CSV_HEADER       = "societe,adresse_postale,code_postal,email_destinataire";
     static final String DOSSIER_BASE     = "outputs";
@@ -41,6 +41,7 @@ public class DashboardServer {
         server.createContext("/api/run",             ex -> serveRun(ex));
         server.createContext("/api/update",          ex -> serveUpdate(ex));
         server.createContext("/api/move-offre",      ex -> serveMoveOffre(ex));
+        server.createContext("/api/del-offre",       ex -> serveDelOffre(ex));
         server.createContext("/api/add-entreprise",  ex -> serveAddEntreprise(ex));
         server.createContext("/api/upd-entreprise",  ex -> serveUpdEntreprise(ex));
         server.createContext("/api/del-entreprise",  ex -> serveDelEntreprise(ex));
@@ -249,6 +250,44 @@ public class DashboardServer {
             ajouterLigneCsv(CSV_ENTREPRISES, row);
 
             // Supprime la ligne du bucket source
+            String bucket = sanitizeBucket(data.optString("bucket", "avec_offre"));
+            File bucketFile = new File(OFFRES_DIR, bucket + ".csv");
+            if (bucketFile.exists()) {
+                List<String> rawLines = new ArrayList<>();
+                String header2 = null;
+                try (BufferedReader br = new BufferedReader(
+                        new InputStreamReader(new FileInputStream(bucketFile), StandardCharsets.UTF_8))) {
+                    header2 = br.readLine();
+                    String l;
+                    while ((l = br.readLine()) != null) {
+                        if (l.trim().isEmpty()) continue;
+                        String[] parts = parseLigne(l);
+                        if (parts.length > 0 && !parts[0].trim().equalsIgnoreCase(societe)) rawLines.add(l);
+                    }
+                }
+                try (PrintWriter pw = new PrintWriter(new OutputStreamWriter(
+                        new FileOutputStream(bucketFile, false), StandardCharsets.UTF_8))) {
+                    if (header2 != null) pw.println(header2);
+                    for (String l : rawLines) pw.println(l);
+                }
+            }
+            serveJson(ex, "{\"ok\":true}");
+        } catch (Exception e) {
+            serveJson(ex, "{\"error\":\"" + e.getMessage().replace("\"", "'") + "\"}");
+        }
+    }
+
+    /** Supprime une offre du bucket source (sans l'ajouter à enValidation.csv). */
+    static void serveDelOffre(HttpExchange ex) throws IOException {
+        if ("OPTIONS".equals(ex.getRequestMethod())) {
+            cors(ex); ex.sendResponseHeaders(204, -1); return;
+        }
+        try {
+            JSONObject data = new JSONObject(
+                new String(ex.getRequestBody().readAllBytes(), StandardCharsets.UTF_8));
+            String societe = data.optString("societe", "").trim();
+            if (societe.isEmpty()) { serveJson(ex, "{\"error\":\"societe manquant\"}"); return; }
+
             String bucket = sanitizeBucket(data.optString("bucket", "avec_offre"));
             File bucketFile = new File(OFFRES_DIR, bucket + ".csv");
             if (bucketFile.exists()) {
